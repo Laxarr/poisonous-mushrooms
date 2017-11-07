@@ -25,38 +25,35 @@ int main (int argc, char **argv) {
 		    exit(1);
 		}
 
-	typedef struct token_t {
-    int token;
-    char *buffer;
-    struct token_t *next;
-	} token_t;
+		buffer* buff = (buffer*) malloc(sizeof(buffer));
+		InitBuffer(buff);
+
 
 	//nacitani znaku
-		//bude to v cyklu (az po konec vstupu - NWM JAK HO POZNam) -slovo END SCOPE ukocuje prekladany program
 	char znak; // jeden nacteny znak
 	
-	//while((znak = fgetc(soubor))) {
+	// pro cela cisla (cc) a desetinna cisla (dc)
+	int pouze_jedno_e = 0; 			//v dc bude pouze jedno 'e', pripadne 'E'
+	int pouze_jedno_znamenko = 0;	//v dc bude pouze jedno '+', pripadne '-'
+	int na_konci_je_cislice = 0;	//zajistuje, ze cc nebo dc bude koncit cislici
+	
 
-	int i = 10;			
-	//tohle predelat na while, ale nwm kdy ma skoncit
-	for (int n = 0; n<=i; n++) {
-	
-	znak = fgetc(soubor); 
-	
+	while((znak = fgetc(soubor)) != EOF) {  // NEZAPOMENOUT NA EOF VYPISUJE JESTE NEWLINE + mozna jeste neco, nwm jestli je to problem
+											// mozna udelat token i pro znak == eof, to tady teda neni
+
 	printf("%c\n", znak);
 	
 		switch (state) {
 
 			case 0: 
 					if (isdigit(znak)) {
-						AddChar(buffer, znak);
+						AddChar(buff, znak);
 						state = 1;
 						
 					}
 
 					else if (isalpha(znak)) {
-						printf("jsem pismeno\n");
-						state = 2;
+						state = 8;
 					}
 					
 					
@@ -65,7 +62,7 @@ int main (int argc, char **argv) {
 					}
 
 					else if (znak == '+') { 
-						//AddChar(buffer, znak);
+						AddChar(buff, znak);
 						state = 0;
 					}
 
@@ -171,28 +168,73 @@ int main (int argc, char **argv) {
 					// chybi zpetne lomitko \ a tohle '
 					break;
 
-			case 1: //cislo
-					if (isdigit(znak)) {
-						//AddChar(buffer, znak);
+			case 1: //CELE CISLO
+					if (isdigit(znak)) { 				//je to cislice
+						na_konci_je_cislice = 1;		//pokud ted bude konec je cislo v poradku
+						AddChar(buff, znak);			//ulozeni do bufferu
 					}
 
-					else if (znak == '.') {
-					//	AddChar(buffer, znak);
+					else if ((znak == '.') && (na_konci_je_cislice != 0)) {	//je tam tecka -> je to des. cislo; musi pred nim byt cislice
+						state = 2;						//bude to deset. cislo
+						na_konci_je_cislice = 0;		// pokud ted bude konec nejedna se o spravne zapsane cislo
+						AddChar(buff, znak);			//ulozeni do bufferu
 					}
 
-					else if ((znak == 'e') || (znak == 'E')) {
-					//	AddChar(buffer, znak);
+					else if (((znak == 'e') || (znak == 'E')) && (na_konci_je_cislice != 0)) {  // je to E nebo e ; musi pred nim byt cislice
+						state = 2;								// bude to deset. cislo
+						pouze_jedno_e += 1;						// zajisti pouze jedno e
+						na_konci_je_cislice = 0;				// pokud ted bude konec nejedna se o spravne zapsane cislo
+						AddChar(buff, znak);					// ulozeni do bufferu
+						
 					}
+
+					else if (na_konci_je_cislice == 1){     // && kdyz je znak == ; , } ] )= // `... pak ungec(znak) jine znaky nepoustet
+						pouze_jedno_e == 0;					//ZEPTAT SE JAKE
+						pouze_jedno_znamenko == 0;
+						na_konci_je_cislice == 0;
+
+						// VYROBIT TOKEN
+						// a nejak ukoncit
+					}
+					
 
 					else {
-						//prirazeni do tokenu
+						//zbudou nepovolene znaky hod error
+						
+						
+					
 					}
-					state = 0;
+			
 					break;
 
-			case 2: //pismeno
-					printf("state 2\n");
-					state = 0;
+			case 2: //DESETINNE CISLO
+					if (isdigit(znak)) {				//je to cislice
+						na_konci_je_cislice = 1;		//pokud ted bude konec je cislo v poradku
+						AddChar(buff, znak);			//ulozeni do bufferu
+					}
+
+					else if (((znak == 'e') || (znak == 'E')) && (pouze_jedno_e == 0)) { 
+						pouze_jedno_e += 1;				// v dc bude pouze jedno 'e', pripadne 'E'	viz horejsi podminka
+						na_konci_je_cislice = 0;		// pokud ted bude konec nejedna se o spravne zapsane cislo
+						AddChar(buff, znak);			// ulozeni do bufferu
+					}
+
+					else if (((znak == '-') || (znak == '+')) && (pouze_jedno_e == 1) && (pouze_jedno_znamenko == 0)) {
+						pouze_jedno_znamenko += 1;		// v dc bude pouze jedno '+', pripadne '-' a musi prednim byt prave jedno e
+						na_konci_je_cislice = 0;		// pokud ted bude konec nejedna se o spravne zapsane cislo
+						AddChar(buff, znak);			// ulozeni do bufferu
+					}
+
+					else if (na_konci_je_cislice == 1){  // znak == ; , } ] )= // `... pak ungec(znak) jine znaky nepoustet
+						pouze_jedno_e == 0;					//ZEPTAT SE JAKE
+						pouze_jedno_znamenko == 0;
+						na_konci_je_cislice == 0;
+					}
+
+					else{							//neco je spatne
+						// nejaky error
+						
+					}
 					break;
 
 			case 3: // vykricnik
@@ -207,7 +249,7 @@ int main (int argc, char **argv) {
 					printf("state 2\n");
 					state = 0;
 					break;
-			case 6: 
+			case 6: //pismeno
 					printf("state 2\n");
 					state = 0;
 					break;
@@ -234,4 +276,4 @@ int main (int argc, char **argv) {
 	fclose (soubor);
 
 	return 1;
-}
+} //konec while
