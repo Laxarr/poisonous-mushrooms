@@ -8,7 +8,7 @@ int sym_tab_init(Sym_Tab *table){
     return 0;
 }
 
-int sym_tab_insert(Sym_Tab *table,/*token*/)
+int sym_tab_insert(Sym_Tab *table/*token*/)
 {
     if (table == NULL)
         return -1;
@@ -28,27 +28,27 @@ int sym_tab_insert(Sym_Tab *table,/*token*/)
         new_elem_ptr->right=NULL;
         table->root=new_elem_ptr;
     }
-    int i=strcmp(table->root->id,/*tokenid*/);
+   int i=strcmp(table->root->id,""/*tokenid*/);
 
     if (i<0)
-        sym_tab_insert(table->root->left,/*token*/);
+        sym_tab_insert(table->root->left/*token*/);
     else if (i>0)
-        sym_tab_insert(table->root->right,/*token*/);
+        sym_tab_insert(table->root->right/*token*/);
     else
         return;
 }
 
-SymTab_Element* sym_tab_find(Sym_Tab *table,/*tokenid*/)
+SymTab_Element* sym_tab_find(Sym_Tab *table/*tokenid*/)
 {
     if (table == NULL)
         return NULL;
 
-    int i=strcmp(table->root->id,/*tokenid*/);
+    int i=strcmp(table->root->id,""/*tokenid*/);
 
     if (i<0)
-        sym_tab_find(table->root->left,/*tokenid*/);
+        sym_tab_find(table->root->left/*tokenid*/);
     else if (i>0)
-        sym_tab_find(table->root->right,/*tokenid*/);
+        sym_tab_find(table->root->right/*tokenid*/);
     else
         return table->root;
 }

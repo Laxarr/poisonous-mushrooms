@@ -1,67 +1,51 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "string.h"
+#include "scanner.h"
 
+int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mnozine povolenych znaku napr. 123+14 ,zde to plus
+	if ((znak==';') || (znak=='/') || (znak=='*') || (znak=='+') || (znak=='-') || (znak==')') || (znak=='=')
+		|| (znak=='>') || (znak=='<') || (znak==',') || (isspace (znak))  )
+		return 0;
+	else
+		return 1;
+}
 
-int main (int argc, char **argv) {
-	//argument bude název souboru
-		//podminky kdyz bude spatnej pocet argumentu
-	// mozna se muze brat vice argumentu, nebo jeste nejaky, NUTNO DODELAT
-	//EXIT SE MUSI NECIM NAHRADIT
-	if ((argc != 2) || (argv[1] == NULL)) {
-		fprintf(stderr, "nespravne argumenty\n");
-		exit(2);
-	}
-
-	//otevreni souboru
-	FILE *soubor;
-
-	char *nazev = argv[1];
-	int state = 0;
-	soubor = fopen(nazev,"rt");
-		if (soubor == NULL) {
-		    fprintf(stderr, "soubor nelze otevrit!\n");
-		    exit(1);
-		}
-
-		buffer* buff = (buffer*) malloc(sizeof(buffer));
-		InitBuffer(buff);
-
-
+    token* GetToken(FILE* soubor)
+    {
+    buffer* buff = (buffer*) malloc(sizeof(buffer));
+    InitBuffer(buff);
+    token* tok = (token*) malloc(sizeof(token));
 	//nacitani znaku
 	char znak; // jeden nacteny znak
-	
+
 	// pro cela cisla (cc) a desetinna cisla (dc)
 	int pouze_jedno_e = 0; 			//v dc bude pouze jedno 'e', pripadne 'E'
 	int pouze_jedno_znamenko = 0;	//v dc bude pouze jedno '+', pripadne '-'
 	int na_konci_je_cislice = 0;	//zajistuje, ze cc nebo dc bude koncit cislici
-	
 
+    int state = 0;
 	while((znak = fgetc(soubor)) != EOF) {  // NEZAPOMENOUT NA EOF VYPISUJE JESTE NEWLINE + mozna jeste neco, nwm jestli je to problem
-											// mozna udelat token i pro znak == eof, to tady teda neni
 
+    if (znak=='\n') break;
+					// mozna udelat token i pro znak == eof, to tady teda neni
 	printf("%c\n", znak);
-	
-		switch (state) {
 
-			case 0: 
+		switch (state) {
+			case 0:
 					if (isdigit(znak)) {
 						AddChar(buff, znak);
 						state = 1;
-						
+
 					}
 
 					else if (isalpha(znak)) {
 						state = 8;
 					}
-					
-					
+
+
 					else if (isspace(znak)) {
 						state = 0;
 					}
 
-					else if (znak == '+') { 
+					else if (znak == '+') {
 						AddChar(buff, znak);
 						state = 0;
 					}
@@ -185,7 +169,7 @@ int main (int argc, char **argv) {
 						pouze_jedno_e += 1;						// zajisti pouze jedno e
 						na_konci_je_cislice = 0;				// pokud ted bude konec nejedna se o spravne zapsane cislo
 						AddChar(buff, znak);					// ulozeni do bufferu
-						
+
 					}
 
 					else if (na_konci_je_cislice == 1){     // && kdyz je znak == ; , } ] )= // `... pak ungec(znak) jine znaky nepoustet
@@ -196,15 +180,15 @@ int main (int argc, char **argv) {
 						// VYROBIT TOKEN
 						// a nejak ukoncit
 					}
-					
+
 
 					else {
 						//zbudou nepovolene znaky hod error
-						
-						
-					
+
+
+
 					}
-			
+
 					break;
 
 			case 2: //DESETINNE CISLO
@@ -213,7 +197,7 @@ int main (int argc, char **argv) {
 						AddChar(buff, znak);			//ulozeni do bufferu
 					}
 
-					else if (((znak == 'e') || (znak == 'E')) && (pouze_jedno_e == 0)) { 
+					else if (((znak == 'e') || (znak == 'E')) && (pouze_jedno_e == 0)) {
 						pouze_jedno_e += 1;				// v dc bude pouze jedno 'e', pripadne 'E'	viz horejsi podminka
 						na_konci_je_cislice = 0;		// pokud ted bude konec nejedna se o spravne zapsane cislo
 						AddChar(buff, znak);			// ulozeni do bufferu
@@ -225,7 +209,12 @@ int main (int argc, char **argv) {
 						AddChar(buff, znak);			// ulozeni do bufferu
 					}
 
-					else if (na_konci_je_cislice == 1){  // znak == ; , } ] )= // `... pak ungec(znak) jine znaky nepoustet
+					else if ((na_konci_je_cislice == 1) && (AllowedNextChar(znak) == 0)) {  // znak == ; , } ] )= // `... pak ungec(znak) jine znaky nepoustet
+
+					ungetc(znak, soubor);
+					tok->type = NUMBER_DOUBLE;
+					tok->double_hodnota = strtod(GetStringBuffer(buff), NULL);
+
 						pouze_jedno_e == 0;					//ZEPTAT SE JAKE
 						pouze_jedno_znamenko == 0;
 						na_konci_je_cislice == 0;
@@ -233,7 +222,7 @@ int main (int argc, char **argv) {
 
 					else{							//neco je spatne
 						// nejaky error
-						
+
 					}
 					break;
 
@@ -269,11 +258,8 @@ int main (int argc, char **argv) {
 		//Loop, Print, Return, Scope, String, Substr, Then, While
 
 		//And,Boolean, Continue, Elseif, Exit, False, For, Next, Not, Or, Shared, Static, True
-	}
-
-	printf("\n");
-	//zavreni souboru
-	fclose (soubor);
-
-	return 1;
-} //konec while
+	} //konec while
+    FreeBuffer(buff);
+	free(buff);
+	return tok;
+}
