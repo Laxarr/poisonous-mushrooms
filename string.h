@@ -13,3 +13,4 @@ typedef struct
 int InitBuffer(buffer* buff);
 void FreeBuffer(buffer* buff);
 int AddChar(buffer* buff,char c);
+char *GetStringBuffer(buffer *buff);

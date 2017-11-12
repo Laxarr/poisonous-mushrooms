@@ -1,8 +1,12 @@
 #include "parser.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
 
 int main (int argc, char **argv) {
 	//argument bude název souboru
-		//podminky kdyz bude spatnej pocet argumentu
+	//podminky kdyz bude spatnej pocet argumentu
 	// mozna se muze brat vice argumentu, nebo jeste nejaky, NUTNO DODELAT
 	//EXIT SE MUSI NECIM NAHRADIT
 	if ((argc != 2) || (argv[1] == "")) {
@@ -18,7 +22,7 @@ int main (int argc, char **argv) {
 		if (soubor == NULL) {
 		    fprintf(stderr, "soubor nelze otevrit!\n");
 		    exit(1);
-		}
+		}	
 
     token* tok=GetToken(soubor);
 

@@ -1,10 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "str.h"
+#include "string.h"
 
 typedef enum {
-
+		tEOF,
+		PLUS,
+		MINUS,
+		NASOBENI,
+		DELENI,
+		MENSI,
+		VETSI,
+		VETSI_ROVNO,
+		MENSI_ROVNO,
+		NEROVNOST,
+		ROVNOST,
 		KEYWORD,
 		NUMBER_DOUBLE,
 		NUMBER_INT

@@ -34,3 +34,8 @@ int AddChar(buffer* buff,char c)
     buff->lenght++;
     return 1;
 }
+
+char *GetStringBuffer(buffer *buff)
+{
+   return buff->str;
+}
