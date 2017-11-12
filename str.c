@@ -1,4 +1,4 @@
-#include "string.h"
+#include "str.h"
 
 int InitBuffer(buffer* buff)
 {
@@ -25,7 +25,6 @@ int AddChar(buffer* buff,char c)
         pom=realloc(buff->str,buff->allocsize+ALLOC_SIZE);
         if (pom==NULL)
         {
-            free(pom);
             return 0;
         }
         buff->str=pom;

@@ -1,84 +1,80 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "string.h"
+#include "scanner.h"
 
+int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mnozine povolenych znaku napr. 123+14 ,zde to plus
+	if ((znak==';') || (znak=='/') || (znak=='*') || (znak=='+') || (znak=='-') || (znak==')') || (znak=='=')
+		|| (znak=='>') || (znak=='<') || (znak==',') || (isspace (znak)) || (znak == EOF))
+		return 0;
+	else
+		return 1;
+}
 
-int main (int argc, char **argv) {
-	//argument bude název souboru
-		//podminky kdyz bude spatnej pocet argumentu
-	// mozna se muze brat vice argumentu, nebo jeste nejaky, NUTNO DODELAT
-	//EXIT SE MUSI NECIM NAHRADIT
-	if ((argc != 2) || (argv[1] == NULL)) {
-		fprintf(stderr, "nespravne argumenty\n");
-		exit(2);
-	}
-
-	//otevreni souboru
-	FILE *soubor;
-
-	char *nazev = argv[1];
-	int state = 0;
-	soubor = fopen(nazev,"rt");
-		if (soubor == NULL) {
-		    fprintf(stderr, "soubor nelze otevrit!\n");
-		    exit(1);
-		}
-
-		buffer* buff = (buffer*) malloc(sizeof(buffer));
-		InitBuffer(buff);
-
-
+    token* GetToken(FILE* soubor)
+    {
+    buffer* buff = (buffer*) malloc(sizeof(buffer));
+   	InitBuffer(buff);
+    token* tok = (token*) malloc(sizeof(token));
 	//nacitani znaku
 	char znak; // jeden nacteny znak
-	
+
 	// pro cela cisla (cc) a desetinna cisla (dc)
 	int pouze_jedno_e = 0; 			//v dc bude pouze jedno 'e', pripadne 'E'
 	int pouze_jedno_znamenko = 0;	//v dc bude pouze jedno '+', pripadne '-'
 	int na_konci_je_cislice = 0;	//zajistuje, ze cc nebo dc bude koncit cislici
-	
 
-	while((znak = fgetc(soubor)) != EOF) {  // NEZAPOMENOUT NA EOF VYPISUJE JESTE NEWLINE + mozna jeste neco, nwm jestli je to problem
-											// mozna udelat token i pro znak == eof, to tady teda neni
+    int state = 0;
 
-	printf("%c\n", znak);
-	
+	while(42) {  
+
+	znak = fgetc(soubor);
+
+    if (znak=='\n') break;
+					// mozna udelat token i pro znak == eof, to tady teda neni ; ted tady je
+	//printf("%c\n", znak);
+
 		switch (state) {
-
-			case 0: 
+			case 0:
 					if (isdigit(znak)) {
 						AddChar(buff, znak);
 						state = 1;
-						
+
 					}
+
+					else if (znak == EOF) {
+						tok->type = tEOF;
+						tok->string_hodnota = GetStringBuffer(buff);
+						FreeBuffer(buff);
+						free(buff);
+						return tok;  }
 
 					else if (isalpha(znak)) {
-						state = 8;
-					}
-					
-					
-					else if (isspace(znak)) {
-						state = 0;
-					}
+						state = 5;
+						AddChar(buff, znak); }
 
-					else if (znak == '+') { 
-						AddChar(buff, znak);
-						state = 0;
-					}
 
-					else if (znak == '-') {
-						state = 0;
-					}
-
-					else if (znak == '*') {
-						state = 4;
-					}
-
-					else if (znak == '/') {
-						state = 0;
-					}
+					else if (isspace(znak)) { state = 0; }
 
 					else if (znak == '+') {
+						tok->type = PLUS;
+						tok->string_hodnota = GetStringBuffer(buff);
+						FreeBuffer(buff);
+						free(buff);
+						return tok; }
+
+					else if (znak == '-') {
+						tok->type = MINUS;
+						tok->string_hodnota =GetStringBuffer(buff);
+						FreeBuffer(buff);
+						free(buff);
+						return tok; }
+
+					else if (znak == '*') {
+						tok->type = NASOBENI;
+						tok->string_hodnota =GetStringBuffer(buff);
+						FreeBuffer(buff);
+						free(buff);
+						return tok;	}
+
+					else if (znak == '/') {
 						state = 0;
 					}
 
@@ -148,10 +144,10 @@ int main (int argc, char **argv) {
 						state = 0;
 					}
 
+					else if (znak == '<') {	state = 3;}
 
-					else if ((znak == '<') || (znak == '>')) {
-						state = 0;
-					}
+					else if (znak == '>') {	state = 4;}
+					
 
 					else if ((znak == '{') || (znak == '}')) {
 						state = 0;
@@ -185,26 +181,29 @@ int main (int argc, char **argv) {
 						pouze_jedno_e += 1;						// zajisti pouze jedno e
 						na_konci_je_cislice = 0;				// pokud ted bude konec nejedna se o spravne zapsane cislo
 						AddChar(buff, znak);					// ulozeni do bufferu
-						
+
 					}
 
-					else if (na_konci_je_cislice == 1){     // && kdyz je znak == ; , } ] )= // `... pak ungec(znak) jine znaky nepoustet
-						pouze_jedno_e == 0;					//ZEPTAT SE JAKE
-						pouze_jedno_znamenko == 0;
-						na_konci_je_cislice == 0;
-
+					else if ((na_konci_je_cislice == 1) && (AllowedNextChar(znak) == 0)) {     // && kdyz je znak == ; , } ] )= // `... pak ungec(znak) jine znaky nepoustet
+						ungetc(znak, soubor);
+						tok->type = NUMBER_INT;
+						tok->int_hodnota = atoi(GetStringBuffer(buff));
+						printf("%s\n",buff->str);
+						printf("kunda\n");
+					FreeBuffer(buff);
+					free(buff);
+					return tok;
 						// VYROBIT TOKEN
 						// a nejak ukoncit
 					}
-					
+
 
 					else {
+						printf("error2\n");
+						return tok;
 						//zbudou nepovolene znaky hod error
-						
-						
-					
 					}
-			
+
 					break;
 
 			case 2: //DESETINNE CISLO
@@ -213,7 +212,7 @@ int main (int argc, char **argv) {
 						AddChar(buff, znak);			//ulozeni do bufferu
 					}
 
-					else if (((znak == 'e') || (znak == 'E')) && (pouze_jedno_e == 0)) { 
+					else if (((znak == 'e') || (znak == 'E')) && (pouze_jedno_e == 0)) {
 						pouze_jedno_e += 1;				// v dc bude pouze jedno 'e', pripadne 'E'	viz horejsi podminka
 						na_konci_je_cislice = 0;		// pokud ted bude konec nejedna se o spravne zapsane cislo
 						AddChar(buff, znak);			// ulozeni do bufferu
@@ -225,30 +224,78 @@ int main (int argc, char **argv) {
 						AddChar(buff, znak);			// ulozeni do bufferu
 					}
 
-					else if (na_konci_je_cislice == 1){  // znak == ; , } ] )= // `... pak ungec(znak) jine znaky nepoustet
-						pouze_jedno_e == 0;					//ZEPTAT SE JAKE
-						pouze_jedno_znamenko == 0;
-						na_konci_je_cislice == 0;
+					else if ((na_konci_je_cislice == 1) && (AllowedNextChar(znak) == 0)) {
+
+					ungetc(znak, soubor);
+					tok->type = NUMBER_DOUBLE;
+					tok->double_hodnota = strtod(GetStringBuffer(buff), NULL);
+
+						 printf("%s\n",buff->str);
+					FreeBuffer(buff);
+					free(buff);
+					return tok;
+
 					}
 
 					else{							//neco je spatne
 						// nejaky error
-						
+						printf("error\n");
+						return tok;
 					}
 					break;
 
-			case 3: // vykricnik
-					printf("state 2\n");
-					state = 0;
-					break;
-			case 4: // operator
-					printf("state 4\n");
-					state = 0;
-					break;
+			case 3: // <= nebo <> nebo <
+					if (znak == '=') {
+						tok->type = MENSI_ROVNO;
+					}
+					else if (znak == '>') {
+						tok->type = NEROVNOST;
+					}
+					else {
+						ungetc (znak, soubor);
+						tok->type = MENSI;
+					}
+					tok->string_hodnota = GetStringBuffer(buff);
+					FreeBuffer(buff);
+					free(buff);	
+					return tok;
+
+			case 4: // >= nebo >
+					if (znak == '=') {
+						tok->type = VETSI_ROVNO;
+					}
+
+					else {
+						ungetc (znak, soubor);
+						tok->type = VETSI;
+					}
+					tok->string_hodnota = GetStringBuffer(buff);
+					FreeBuffer(buff);
+					free(buff);				
+					return tok;
+					
 			case 5: // klicove slovo
-					printf("state 2\n");
-					state = 0;
-					break;
+					if (!isalpha(znak)) {
+						//ugetc ()
+					//	int neco = Is_Keyword(buff);
+						int neco;
+						if (neco = 0) {
+							// neni to key word 
+							break;
+						}
+				/*		else if (neco==1) { tok.type = VETSI;} else if (neco==2) { tok.type = VETSI;} else if (neco==3) { tok.type = VETSI;} 
+						else if (neco==4) { tok.type = VETSI;} else if (neco==5) { tok.type = VETSI;} else if (neco==6) { tok.type = VETSI;} 
+						else if (neco==7) { tok.type = VETSI;} else if (neco==8) { tok.type = VETSI;} else if (neco==9) { tok.type = VETSI;} 
+						else if (neco==10) { tok.type = VETSI;} else if (neco==11) { tok.type = VETSI;} else if (neco==12) { tok.type = VETSI;} 
+						else if (neco==13) { tok.type = VETSI;} else if (neco==14) { tok.type = VETSI;} else if (neco==15) { tok.type = VETSI;} 
+						else if (neco==16) { tok.type = VETSI;} else if (neco==17) { tok.type = VETSI;} else if (neco==18) { tok.type = VETSI;} 
+						else if (neco==19) { tok.type = VETSI;} else if (neco==20) { tok.type = VETSI;} else if (neco==21) { tok.type = VETSI;}
+						else if (neco==22) { tok.type = VETSI;} else if (neco==23) { tok.type = VETSI;} else if (neco==24) { tok.type = VETSI;} 
+						else if (neco==25) { tok.type = VETSI;} else if (neco==26) { tok.type = VETSI;} else if (neco==27) { tok.type = VETSI;} 
+						else if (neco==28) { tok.type = VETSI;} else if (neco==29) { tok.type = VETSI;} else if (neco==30) { tok.type = VETSI;}
+						else if (neco==31) { tok.type = VETSI;} else if (neco==32) { tok.type = VETSI;} else if (neco==33) { tok.type = VETSI;} 
+						else if (neco==34) { tok.type = VETSI;} else if (neco==35) { tok.type = VETSI;} */
+					} 
 			case 6: //pismeno
 					printf("state 2\n");
 					state = 0;
@@ -269,11 +316,6 @@ int main (int argc, char **argv) {
 		//Loop, Print, Return, Scope, String, Substr, Then, While
 
 		//And,Boolean, Continue, Elseif, Exit, False, For, Next, Not, Or, Shared, Static, True
-	}
-
-	printf("\n");
-	//zavreni souboru
-	fclose (soubor);
-
-	return 1;
-} //konec while
+	} //konec while
+    
+}
