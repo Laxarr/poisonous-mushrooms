@@ -1,5 +1,17 @@
 #include "scanner.h"
 
+int Is_Keyword(const char *nacteny_text) {
+	char *array[35] = {"as", "asc", "declare", "do", "dim", "double", "else", "end", "chr", "function", "if", "input",
+	 "integer", "lenght", "loop", "print", "return", "scope", "string", "substr", "then", "while", "and", "boolean", 
+	 "continue", "elseif", "exit", "false", "for", "next", "not", "or", "shared", "static", "true" } ;
+
+	for (int n = 0; n < 35; n++) {
+		if (strcmp(nacteny_text, array[n]) == 0) {
+			return 1;
+		}
+	}
+}
+
 int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mnozine povolenych znaku napr. 123+14 ,zde to plus
 	if ((znak==';') || (znak=='/') || (znak=='*') || (znak=='+') || (znak=='-') || (znak==')') || (znak=='=')
 		|| (znak=='>') || (znak=='<') || (znak==',') || (isspace (znak)) || (znak == EOF))
@@ -21,7 +33,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 	int pouze_jedno_znamenko = 0;	//v dc bude pouze jedno '+', pripadne '-'
 	int na_konci_je_cislice = 0;	//zajistuje, ze cc nebo dc bude koncit cislici
 
-    int state = 0;
+    int state = 0; //Konecny automat
 
 	while(42) {  
 
@@ -35,9 +47,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 			case 0:
 					if (isdigit(znak)) {
 						AddChar(buff, znak);
-						state = 1;
-
-					}
+						state = 1; }
 
 					else if (znak == EOF) {
 						tok->type = tEOF;
@@ -50,8 +60,8 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 5;
 						AddChar(buff, znak); }
 
-
-					else if (isspace(znak)) { state = 0; }
+					else if (isspace(znak)) { state = 0;
+						printf("jejda\n"); }
 
 					else if (znak == '+') {
 						tok->type = PLUS;
@@ -74,9 +84,8 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						free(buff);
 						return tok;	}
 
-					else if (znak == '/') {
-						state = 0;
-					}
+					else if (znak == '/') { state = 12;
+						 }
 
 					else if (znak == '@') {
 						state = 0;
@@ -86,8 +95,24 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 0;
 					}
 
-					else if (znak == '!') {
+					else if (znak == '\0') { 
+						printf("zaddscccek\n");
 						state = 0;
+						 }
+
+					else if (znak == 92) { 
+						printf("zaddseeeek\n");
+						state = 0;
+						 }	 
+
+					else if (znak == '\n') { 
+						printf("zaddaasek\n");
+						state = 0;
+						 }
+					else if (znak == '!') {
+						printf("staaaate 2\n");
+						state = 10;
+						AddChar(buff, znak);
 					}
 
 					else if (znak == '$') {
@@ -108,8 +133,8 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 0;
 					}
 					else if (znak == '_') {
-						state = 0;
-					}
+						state = 6;
+						AddChar(buff, znak); }
 
 					else if (znak == '|') {
 						state = 0;
@@ -142,6 +167,10 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 					else if (znak == '%') {
 						state = 0;
+					}
+
+					else if (znak == 39) {   
+						state = 9;
 					}
 
 					else if (znak == '<') {	state = 3;}
@@ -193,8 +222,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					FreeBuffer(buff);
 					free(buff);
 					return tok;
-						// VYROBIT TOKEN
-						// a nejak ukoncit
 					}
 
 
@@ -275,47 +302,137 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					return tok;
 					
 			case 5: // klicove slovo
-					if (!isalpha(znak)) {
-						//ugetc ()
-					//	int neco = Is_Keyword(buff);
-						int neco;
-						if (neco = 0) {
-							// neni to key word 
-							break;
+					if ((!isalpha(znak)) && (!isdigit(znak)) && (znak != '_')) {
+						ungetc (znak, soubor);
+
+						int neco = Is_Keyword(GetStringBuffer(buff));
+						if (neco == 1) {	// je to keyword 
+
+							tok->type = KEYWORD;
+							tok->string_hodnota = GetStringBuffer(buff);
+							FreeBuffer(buff);
+							free(buff);				
+							return tok;
 						}
-				/*		else if (neco==1) { tok.type = VETSI;} else if (neco==2) { tok.type = VETSI;} else if (neco==3) { tok.type = VETSI;} 
-						else if (neco==4) { tok.type = VETSI;} else if (neco==5) { tok.type = VETSI;} else if (neco==6) { tok.type = VETSI;} 
-						else if (neco==7) { tok.type = VETSI;} else if (neco==8) { tok.type = VETSI;} else if (neco==9) { tok.type = VETSI;} 
-						else if (neco==10) { tok.type = VETSI;} else if (neco==11) { tok.type = VETSI;} else if (neco==12) { tok.type = VETSI;} 
-						else if (neco==13) { tok.type = VETSI;} else if (neco==14) { tok.type = VETSI;} else if (neco==15) { tok.type = VETSI;} 
-						else if (neco==16) { tok.type = VETSI;} else if (neco==17) { tok.type = VETSI;} else if (neco==18) { tok.type = VETSI;} 
-						else if (neco==19) { tok.type = VETSI;} else if (neco==20) { tok.type = VETSI;} else if (neco==21) { tok.type = VETSI;}
-						else if (neco==22) { tok.type = VETSI;} else if (neco==23) { tok.type = VETSI;} else if (neco==24) { tok.type = VETSI;} 
-						else if (neco==25) { tok.type = VETSI;} else if (neco==26) { tok.type = VETSI;} else if (neco==27) { tok.type = VETSI;} 
-						else if (neco==28) { tok.type = VETSI;} else if (neco==29) { tok.type = VETSI;} else if (neco==30) { tok.type = VETSI;}
-						else if (neco==31) { tok.type = VETSI;} else if (neco==32) { tok.type = VETSI;} else if (neco==33) { tok.type = VETSI;} 
-						else if (neco==34) { tok.type = VETSI;} else if (neco==35) { tok.type = VETSI;} */
-					} 
-			case 6: //pismeno
-					printf("state 2\n");
-					state = 0;
+
+						else {
+							tok->type = ID;
+							tok->string_hodnota = GetStringBuffer(buff);
+							FreeBuffer(buff);
+							free(buff);				
+							return tok; ;
+						}
+					}
+					else if ((isdigit(znak)) || (znak == '_')) {
+						AddChar(buff, znak);
+						state = 6; }
+
+					else {
+						AddChar(buff, znak);}
+					break;
+
+			case 6: // je to ID 
+					if ((isalpha(znak)) || (isdigit(znak)) || (znak == '_')) {
+						AddChar(buff, znak);
+					}
+
+					else {	
+							ungetc (znak, soubor);
+							tok->type = ID;
+							tok->string_hodnota = GetStringBuffer(buff);
+							FreeBuffer(buff);
+							free(buff);				
+							return tok; ;
+					}
 					break;
 			case 7:
 					printf("state 2\n");
 					state = 0;
 					break;
-			case 8:
-					printf("state 2\n");
-					state = 0;
+			case 8: 
+			
+
+						
 					break;
+
+			case 9: //jednoradkovy komentar
+					printf("%c\n",znak );
+					if (znak == '\n') {
+						printf("sstate 2\n");
+						state = 0;
+					}
+					else if (znak == '\0') {
+						printf("swwtate 2\n");
+						state = 0;
+					}
+					else {
+						printf("staaaate 2\n");
+					}
+					break;
+			case 10: //stringovy literal 1/2
+					 if (znak == '"'){
+					 	state = 11;
+					 	AddChar(buff, znak);
+					 	}
+					 else { printf("tohle neni retezec\n");}
+					
+					 break;
+
+			case 11: //stringovy literal 2/2
+					 if (znak == '"')  {
+					 		AddChar(buff, znak);
+
+					 		printf("%s\n",buff->str);
+
+					 		tok->type = RETEZEC;
+							tok->string_hodnota = GetStringBuffer(buff);
+							FreeBuffer(buff);
+							free(buff);	
+							return tok;
+					 	}
+
+					 else if (znak == '#') {
+					 		printf("tohle neni retezec\n");
+					 		 return tok; }
+					 else {	
+					 		AddChar(buff, znak);
+					 } 
+
+					 break;
+
+			case 12: //komentar nebo deleni		
+					if (znak == 39) {  //JE TO KOMENTAR
+						state = 13;
+					}
+
+					else {		// je to deleni
+						ungetc (znak, soubor);
+						tok->type = DELENI;
+						tok->string_hodnota = GetStringBuffer(buff);
+						FreeBuffer(buff);
+						free(buff);	
+						return tok;
+					}
+					break;
+
+			case 13: if (znak == 39) {
+					state = 14; }
+					break;
+
+			case 14: 
+					if (znak == '/') {
+								printf("modrin\n");
+								state = 0; }
+
+					else {
+						printf("erroeeer\n");
+						return tok;
+					}
+					break;				
+
 
 		}
 
-		//klicova slova
-		//As, Asc, Declare, Dim, Do, Double, Else, End, Chr, Function, If, Input, Integer, Length
-		//Loop, Print, Return, Scope, String, Substr, Then, While
-
-		//And,Boolean, Continue, Elseif, Exit, False, For, Next, Not, Or, Shared, Static, True
 	} //konec while
     
 }
