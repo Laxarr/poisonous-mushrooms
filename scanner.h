@@ -2,9 +2,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+
+#ifndef SCANNER
+#define SCANNER
+
 #include "string.h"
 
 typedef enum {
+        tEOL,
 		tEOF,
 		ID,
 		RETEZEC,
@@ -18,6 +23,10 @@ typedef enum {
 		MENSI_ROVNO,
 		NEROVNOST,
 		ROVNOST,
+		CARKA,
+		STREDNIK,
+		LEVA_ZAV,
+		PRAVA_ZAV,
 		KEYWORD,
 		NUMBER_DOUBLE,
 		NUMBER_INT
@@ -34,3 +43,5 @@ typedef enum {
 
 	token* GetToken(FILE* soubor);
 	int AllowedNextChar(char znak);
+    void UngetToken(token* tok);
+#endif

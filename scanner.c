@@ -1,8 +1,12 @@
 #include "scanner.h"
+void UngetToken(token* tok)
+{
+
+}
 
 int Is_Keyword(const char *nacteny_text) {
 	char *array[35] = {"as", "asc", "declare", "do", "dim", "double", "else", "end", "chr", "function", "if", "input",
-	 "integer", "lenght", "loop", "print", "return", "scope", "string", "substr", "then", "while", "and", "boolean", 
+	 "integer", "lenght", "loop", "print", "return", "scope", "string", "substr", "then", "while", "and", "boolean",
 	 "continue", "elseif", "exit", "false", "for", "next", "not", "or", "shared", "static", "true" } ;
 
 	for (int n = 0; n < 35; n++) {
@@ -10,6 +14,7 @@ int Is_Keyword(const char *nacteny_text) {
 			return 1;
 		}
 	}
+	return 0;
 }
 
 int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mnozine povolenych znaku napr. 123+14 ,zde to plus
@@ -35,11 +40,10 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
     int state = 0; //Konecny automat
 
-	while(42) {  
+	while(42) {
 
 	znak = fgetc(soubor);
 
-    if (znak=='\n') break;
 					// mozna udelat token i pro znak == eof, to tady teda neni ; ted tady je
 	//printf("%c\n", znak);
 
@@ -95,17 +99,17 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 0;
 					}
 
-					else if (znak == '\0') { 
+					else if (znak == '\0') {
 						printf("zaddscccek\n");
 						state = 0;
 						 }
 
-					else if (znak == 92) { 
+					else if (znak == 92) {
 						printf("zaddseeeek\n");
 						state = 0;
-						 }	 
+						 }
 
-					else if (znak == '\n') { 
+					else if (znak == '\n') {
 						printf("zaddaasek\n");
 						state = 0;
 						 }
@@ -169,14 +173,14 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 0;
 					}
 
-					else if (znak == 39) {   
+					else if (znak == 39) {
 						state = 9;
 					}
 
 					else if (znak == '<') {	state = 3;}
 
 					else if (znak == '>') {	state = 4;}
-					
+
 
 					else if ((znak == '{') || (znak == '}')) {
 						state = 0;
@@ -284,7 +288,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 					tok->string_hodnota = GetStringBuffer(buff);
 					FreeBuffer(buff);
-					free(buff);	
+					free(buff);
 					return tok;
 
 			case 4: // >= nebo >
@@ -298,20 +302,20 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 					tok->string_hodnota = GetStringBuffer(buff);
 					FreeBuffer(buff);
-					free(buff);				
+					free(buff);
 					return tok;
-					
+
 			case 5: // klicove slovo
-					if ((!isalpha(znak)) && (!isdigit(znak)) && (znak != '_')) {
+                        if ((!isalpha(znak)) && (!isdigit(znak)) && (znak != '_')) {
 						ungetc (znak, soubor);
 
 						int neco = Is_Keyword(GetStringBuffer(buff));
-						if (neco == 1) {	// je to keyword 
+						if (neco == 1) {	// je to keyword
 
 							tok->type = KEYWORD;
 							tok->string_hodnota = GetStringBuffer(buff);
 							FreeBuffer(buff);
-							free(buff);				
+							free(buff);
 							return tok;
 						}
 
@@ -319,7 +323,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 							tok->type = ID;
 							tok->string_hodnota = GetStringBuffer(buff);
 							FreeBuffer(buff);
-							free(buff);				
+							free(buff);
 							return tok; ;
 						}
 					}
@@ -331,17 +335,17 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						AddChar(buff, znak);}
 					break;
 
-			case 6: // je to ID 
+			case 6: // je to ID
 					if ((isalpha(znak)) || (isdigit(znak)) || (znak == '_')) {
 						AddChar(buff, znak);
 					}
 
-					else {	
+					else {
 							ungetc (znak, soubor);
 							tok->type = ID;
 							tok->string_hodnota = GetStringBuffer(buff);
 							FreeBuffer(buff);
-							free(buff);				
+							free(buff);
 							return tok; ;
 					}
 					break;
@@ -349,10 +353,10 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					printf("state 2\n");
 					state = 0;
 					break;
-			case 8: 
-			
+			case 8:
 
-						
+
+
 					break;
 
 			case 9: //jednoradkovy komentar
@@ -375,7 +379,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					 	AddChar(buff, znak);
 					 	}
 					 else { printf("tohle neni retezec\n");}
-					
+
 					 break;
 
 			case 11: //stringovy literal 2/2
@@ -387,20 +391,20 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					 		tok->type = RETEZEC;
 							tok->string_hodnota = GetStringBuffer(buff);
 							FreeBuffer(buff);
-							free(buff);	
+							free(buff);
 							return tok;
 					 	}
 
 					 else if (znak == '#') {
 					 		printf("tohle neni retezec\n");
 					 		 return tok; }
-					 else {	
+					 else {
 					 		AddChar(buff, znak);
-					 } 
+					 }
 
 					 break;
 
-			case 12: //komentar nebo deleni		
+			case 12: //komentar nebo deleni
 					if (znak == 39) {  //JE TO KOMENTAR
 						state = 13;
 					}
@@ -410,7 +414,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						tok->type = DELENI;
 						tok->string_hodnota = GetStringBuffer(buff);
 						FreeBuffer(buff);
-						free(buff);	
+						free(buff);
 						return tok;
 					}
 					break;
@@ -419,7 +423,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					state = 14; }
 					break;
 
-			case 14: 
+			case 14:
 					if (znak == '/') {
 								printf("modrin\n");
 								state = 0; }
@@ -428,11 +432,11 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						printf("erroeeer\n");
 						return tok;
 					}
-					break;				
+					break;
 
 
 		}
 
 	} //konec while
-    
+
 }
