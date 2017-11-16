@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ALLOC_SIZE 100
+#ifndef STRING
+#define STRING
 
 typedef struct
 {
@@ -14,3 +15,5 @@ int InitBuffer(buffer* buff);
 void FreeBuffer(buffer* buff);
 int AddChar(buffer* buff,char c);
 char *GetStringBuffer(buffer *buff);
+
+#endif

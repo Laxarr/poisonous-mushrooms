@@ -1,5 +1,7 @@
 #include "string.h"
 
+#define ALLOC_SIZE 100
+
 int InitBuffer(buffer* buff)
 {
     buff->allocsize=ALLOC_SIZE;

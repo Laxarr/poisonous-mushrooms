@@ -17,25 +17,35 @@ int sym_tab_insert(Sym_Tab *table/*token*/)
         SymTab_Element* new_elem_ptr = (SymTab_Element *) malloc(sizeof(SymTab_Element));
 
         if (new_elem_ptr == NULL)
+        {
             return -1;
-
-        new_elem_ptr->id=""/*tokenid*/;
-        new_elem_ptr->elem_type=SymTab_ElemType_Var/*tokentype*/;
-        new_elem_ptr->data_type=SymTab_DataType_Integer/*tokendata*/;
-        new_elem_ptr->declared=0;
-        new_elem_ptr->initialized=0;
-        new_elem_ptr->left=NULL;
-        new_elem_ptr->right=NULL;
-        table->root=new_elem_ptr;
+        }
+        else
+        {
+            new_elem_ptr->id=""/*tokenid*/;
+            new_elem_ptr->elem_type=SymTab_ElemType_Var/*tokentype*/;
+            new_elem_ptr->data_type=SymTab_DataType_Integer/*tokendata*/;
+            new_elem_ptr->declared=0;
+            new_elem_ptr->initialized=0;
+            new_elem_ptr->left=NULL;
+            new_elem_ptr->right=NULL;
+            table->root=new_elem_ptr;
+            return 1;
+        }
     }
-   int i=strcmp(table->root->id,""/*tokenid*/);
-
+    Sym_Tab* pom=table;
+    int i=strcmp(table->root->id,""/*tokenid*/);
     if (i<0)
-        sym_tab_insert(table->root->left/*token*/);
+    {
+        pom->root=pom->root->left;
+        sym_tab_insert(pom/*token*/);
+    }
     else if (i>0)
-        sym_tab_insert(table->root->right/*token*/);
-    else
-        return;
+    {
+        pom->root=pom->root->right;
+        sym_tab_insert(pom/*token*/);
+    }
+    return 0;
 }
 
 SymTab_Element* sym_tab_find(Sym_Tab *table/*tokenid*/)
@@ -44,21 +54,32 @@ SymTab_Element* sym_tab_find(Sym_Tab *table/*tokenid*/)
         return NULL;
 
     int i=strcmp(table->root->id,""/*tokenid*/);
+    Sym_Tab* pom=table;
 
     if (i<0)
-        sym_tab_find(table->root->left/*tokenid*/);
+    {
+        pom->root=pom->root->left;
+        sym_tab_find(pom/*token*/);
+    }
     else if (i>0)
-        sym_tab_find(table->root->right/*tokenid*/);
+    {
+        pom->root=pom->root->right;
+        sym_tab_find(pom/*token*/);
+    }
     else
         return table->root;
+    return NULL;
 }
 
 void sym_tab_free(Sym_Tab *table)
 {
     if (table->root != NULL)
     {
-        sym_tab_free(table->root->left);
-        sym_tab_free(table->root->right);
+        Sym_Tab* pom=table;
+        pom->root=pom->root->left;
+        sym_tab_free(pom);
+        pom->root=pom->root->right;
+        sym_tab_free(pom);
         free(table->root);
     }
     table->root=NULL;
