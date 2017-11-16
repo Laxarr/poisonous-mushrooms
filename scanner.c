@@ -43,12 +43,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 	while(42) {
 
 	znak = fgetc(soubor);
-	if (znak==EOF)
-    {
-        tok->type=tEOF;
-        tok->string_hodnota="eof";
-        return tok;
-    }
+
 					// mozna udelat token i pro znak == eof, to tady teda neni ; ted tady je
 	//printf("%c\n", znak);
 
