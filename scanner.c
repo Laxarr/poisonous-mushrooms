@@ -1,20 +1,21 @@
 #include "scanner.h"
+
 void UngetToken(token* tok)
 {
-
+    returned=tok;
 }
 
 int Is_Keyword(const char *nacteny_text) {
 	char *array[35] = {"as", "asc", "declare", "do", "dim", "double", "else", "end", "chr", "function", "if", "input",
-	 "integer", "lenght", "loop", "print", "return", "scope", "string", "substr", "then", "while", "and", "boolean",
-	 "continue", "elseif", "exit", "false", "for", "next", "not", "or", "shared", "static", "true" } ;
+	 "length", "loop", "print", "return", "scope", "string", "then", "while", "and", "boolean",
+	 "continue", "elseif", "exit", "false", "for", "next", "not", "or", "shared", "static", "true", "substr", "integer"} ;
 
 	for (int n = 0; n < 35; n++) {
 		if (strcmp(nacteny_text, array[n]) == 0) {
-			return 1;
+			return n;
 		}
 	}
-	return 0;
+	return 1066;
 }
 
 int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mnozine povolenych znaku napr. 123+14 ,zde to plus
@@ -27,6 +28,12 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
     token* GetToken(FILE* soubor)
     {
+        if (returned!=NULL)
+        {
+            token* pom=returned;
+            returned=NULL;
+            return pom;
+        }
     buffer* buff = (buffer*) malloc(sizeof(buffer));
    	InitBuffer(buff);
     token* tok = (token*) malloc(sizeof(token));
@@ -43,7 +50,11 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 	while(42) {
 
 	znak = fgetc(soubor);
-
+    if (znak>64 && znak<91)
+    {
+        znak+=32;
+    }
+    //if (znak=='\n') break;
 					// mozna udelat token i pro znak == eof, to tady teda neni ; ted tady je
 	//printf("%c\n", znak);
 
@@ -54,8 +65,8 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 1; }
 
 					else if (znak == EOF) {
+						AddChar(buff, znak);
 						tok->type = tEOF;
-						tok->string_hodnota = GetStringBuffer(buff);
 						FreeBuffer(buff);
 						free(buff);
 						return tok;  }
@@ -65,25 +76,31 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						AddChar(buff, znak); }
 
 					else if (isspace(znak)) { state = 0;
-						printf("jejda\n"); }
+						if (znak == '\n') {
+							AddChar(buff, znak);
+							tok->type = tEOL;
+							FreeBuffer(buff);
+							free(buff);
+							return tok;	}
+						}
 
 					else if (znak == '+') {
+						AddChar(buff, znak);
 						tok->type = PLUS;
-						tok->string_hodnota = GetStringBuffer(buff);
 						FreeBuffer(buff);
 						free(buff);
 						return tok; }
 
 					else if (znak == '-') {
+						AddChar(buff, znak);
 						tok->type = MINUS;
-						tok->string_hodnota =GetStringBuffer(buff);
 						FreeBuffer(buff);
 						free(buff);
 						return tok; }
 
 					else if (znak == '*') {
+						AddChar(buff, znak);
 						tok->type = NASOBENI;
-						tok->string_hodnota =GetStringBuffer(buff);
 						FreeBuffer(buff);
 						free(buff);
 						return tok;	}
@@ -100,21 +117,17 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 
 					else if (znak == '\0') {
-						printf("zaddscccek\n");
 						state = 0;
 						 }
 
 					else if (znak == 92) {
-						printf("zaddseeeek\n");
 						state = 0;
 						 }
 
 					else if (znak == '\n') {
-						printf("zaddaasek\n");
 						state = 0;
 						 }
 					else if (znak == '!') {
-						printf("staaaate 2\n");
 						state = 10;
 						AddChar(buff, znak);
 					}
@@ -124,7 +137,11 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 
 					else if (znak == '^') {
-						state = 0;
+						AddChar(buff, znak);
+						tok->type = MOCNICI_STRIZKA;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
 					else if (znak == '`') {
@@ -145,20 +162,36 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 
 					else if (znak == '.') {
-						state = 0;
+						tok->type = TECKA;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
 					else if (znak == ',') {
-						state = 0;
+						tok->type = CARKA;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 					else if (znak == '?') {
-						state = 0;
+						tok->type = OTAZNIK;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 					else if (znak == ';') {
-						state = 0;
+						tok->type = STREDNIK;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 					else if (znak == '=') {
-						state = 0;
+						tok->type = ROVNOST;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
+
 					}
 
 					else if (znak == ':') {
@@ -173,25 +206,53 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 0;
 					}
 
-					else if (znak == 39) {
+					else if (znak == 39) {   //radkovy komentar
 						state = 9;
 					}
 
-					else if (znak == '<') {	state = 3;}
+					else if (znak == '<') {	state = 3; AddChar(buff, znak);	}
 
-					else if (znak == '>') {	state = 4;}
+					else if (znak == '>') {	state = 4; AddChar(buff, znak); }
 
 
-					else if ((znak == '{') || (znak == '}')) {
-						state = 0;
+					else if (znak == '{') {
+						tok->type = SLOZENA_ZAC;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
+					}
+					else if (znak == '}') {
+						tok->type = SLOZENA_KON;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
-					else if ((znak == '[') || (znak == ']')) {
-						state = 0;
+					else if (znak == '[') {
+						tok->type =HRANATA_ZAC;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
-					else if ((znak == '(') || (znak == ')')) {
-						state = 0;
+					else if (znak == ']') {
+						tok->type = HRANATA_KON;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
+					}
+
+					else if (znak == '(') {
+						tok->type = KULATA_ZAV_ZAC;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
+					}
+					else if (znak == ')') {
+						tok->type = KULATA_ZAV_KON;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
 					// chybi zpetne lomitko \ a tohle '
@@ -221,8 +282,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						ungetc(znak, soubor);
 						tok->type = NUMBER_INT;
 						tok->int_hodnota = atoi(GetStringBuffer(buff));
-						printf("%s\n",buff->str);
-						printf("kunda\n");
 					FreeBuffer(buff);
 					free(buff);
 					return tok;
@@ -230,7 +289,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 
 					else {
-						printf("error2\n");
 						return tok;
 						//zbudou nepovolene znaky hod error
 					}
@@ -260,8 +318,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					ungetc(znak, soubor);
 					tok->type = NUMBER_DOUBLE;
 					tok->double_hodnota = strtod(GetStringBuffer(buff), NULL);
-
-						 printf("%s\n",buff->str);
 					FreeBuffer(buff);
 					free(buff);
 					return tok;
@@ -286,7 +342,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						ungetc (znak, soubor);
 						tok->type = MENSI;
 					}
-					tok->string_hodnota = GetStringBuffer(buff);
+
 					FreeBuffer(buff);
 					free(buff);
 					return tok;
@@ -300,20 +356,31 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						ungetc (znak, soubor);
 						tok->type = VETSI;
 					}
-					tok->string_hodnota = GetStringBuffer(buff);
+
 					FreeBuffer(buff);
 					free(buff);
 					return tok;
 
 			case 5: // klicove slovo
-                        if ((!isalpha(znak)) && (!isdigit(znak)) && (znak != '_')) {
+					if ((!isalpha(znak)) && (!isdigit(znak)) && (znak != '_')) {
 						ungetc (znak, soubor);
 
 						int neco = Is_Keyword(GetStringBuffer(buff));
-						if (neco == 1) {	// je to keyword
+						if (neco != 1066) {	// je to keyword
 
-							tok->type = KEYWORD;
-							tok->string_hodnota = GetStringBuffer(buff);
+						if (neco==1) { tok->type = ASC;} 		else if (neco==2) { tok->type = DECLARE;}  		else if (neco==3) { tok->type = DO;}
+						else if (neco==4) { tok->type = DIM;} 	else if (neco==5) { tok->type = DOUBLE;} 	else if (neco==6) { tok->type = ELSE;}
+						else if (neco==7) { tok->type = END;} 	else if (neco==8) { tok->type = CHR;}		else if (neco==9) { tok->type = FUNCTION;}
+						else if (neco==10) { tok->type = IF;} 	else if (neco==11) { tok->type = INPUT;} 	else if (neco==12) { tok->type = LENGHT;}
+						else if (neco==13) { tok->type = LOOP;} else if (neco==14) { tok->type = PRINT;} 	else if (neco==15) { tok->type = RETURN;}
+						else if (neco==16) { tok->type = SCOPE;} else if (neco==17) { tok->type = STRING;} 	else if (neco==18) { tok->type = THEN;}
+						else if (neco==19) { tok->type = WHILE;} else if (neco==20) { tok->type = AND;} 	else if (neco==21) { tok->type = tBOOLEAN;}
+						else if (neco==22) { tok->type = tCONTINUE;} else if (neco==23) { tok->type = ELSEIF;} else if (neco==24) { tok->type= EXIT;}
+						else if (neco==25) { tok->type = tFALSE;} 	else if (neco==26) { tok->type = FOR;} 	  else if (neco==27) { tok->type = NEXT;}
+						else if (neco==28) { tok->type = NOT;} 		else if (neco==29) { tok->type = OR;} 	  else if (neco==30) { tok->type = SHARED;}
+						else if (neco==31) { tok->type = STATIC;} 	else if (neco==32) { tok->type = tTRUE;}  else if (neco==33) { tok->type = SUBSTR;}
+						else if (neco==34) { tok->type = INTEGER;} 	else if (neco== 0) { tok->type = AS;}
+
 							FreeBuffer(buff);
 							free(buff);
 							return tok;
@@ -321,7 +388,9 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 						else {
 							tok->type = ID;
-							tok->string_hodnota = GetStringBuffer(buff);
+							tok->string_hodnota = realloc(tok->string_hodnota, buff->lenght);
+							strcpy(tok->string_hodnota, buff->str);
+							tok->string_hodnota[buff->lenght]='\0';
 							FreeBuffer(buff);
 							free(buff);
 							return tok; ;
@@ -343,14 +412,15 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					else {
 							ungetc (znak, soubor);
 							tok->type = ID;
-							tok->string_hodnota = GetStringBuffer(buff);
+							tok->string_hodnota = realloc(tok->string_hodnota, buff->lenght);
+							strcpy(tok->string_hodnota, buff->str);
+							tok->string_hodnota[buff->lenght]='\0';
 							FreeBuffer(buff);
 							free(buff);
 							return tok; ;
 					}
 					break;
 			case 7:
-					printf("state 2\n");
 					state = 0;
 					break;
 			case 8:
@@ -361,16 +431,15 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 			case 9: //jednoradkovy komentar
 					printf("%c\n",znak );
-					if (znak == '\n') {
-						printf("sstate 2\n");
+					if ((znak == '\n') || (znak == EOF)) {
+						ungetc (znak, soubor);
 						state = 0;
 					}
-					else if (znak == '\0') {
-						printf("swwtate 2\n");
-						state = 0;
+					else if (znak == '\0') { //mozna s nim budou problemy
+
 					}
 					else {
-						printf("staaaate 2\n");
+
 					}
 					break;
 			case 10: //stringovy literal 1/2
@@ -385,11 +454,10 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 			case 11: //stringovy literal 2/2
 					 if (znak == '"')  {
 					 		AddChar(buff, znak);
-
-					 		printf("%s\n",buff->str);
-
 					 		tok->type = RETEZEC;
-							tok->string_hodnota = GetStringBuffer(buff);
+							tok->string_hodnota = realloc(tok->string_hodnota, buff->lenght);
+							strcpy(tok->string_hodnota, buff->str);
+							tok->string_hodnota[buff->lenght]='\0';
 							FreeBuffer(buff);
 							free(buff);
 							return tok;
@@ -412,7 +480,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					else {		// je to deleni
 						ungetc (znak, soubor);
 						tok->type = DELENI;
-						tok->string_hodnota = GetStringBuffer(buff);
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
@@ -425,7 +492,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 			case 14:
 					if (znak == '/') {
-								printf("modrin\n");
 								state = 0; }
 
 					else {

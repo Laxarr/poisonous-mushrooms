@@ -23,6 +23,6 @@ int I();
 int E();
 int Else();
 int Out();
-
+void DeleteEOL();
 FILE* soubor;
 #endif

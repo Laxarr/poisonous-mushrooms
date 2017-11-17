@@ -9,8 +9,20 @@
 #include "string.h"
 
 typedef enum {
-        tEOL,
-		tEOF,
+        tEOF,
+		tEOL,
+		MOCNICI_STRIZKA,
+		TECKA,
+		CARKA,
+		OTAZNIK,
+		MRIZKA,
+		STREDNIK,
+		KULATA_ZAV_KON,
+		KULATA_ZAV_ZAC,
+		HRANATA_ZAC,
+		HRANATA_KON,
+		SLOZENA_ZAC,
+		SLOZENA_KON,
 		ID,
 		RETEZEC,
 		PLUS,
@@ -23,13 +35,43 @@ typedef enum {
 		MENSI_ROVNO,
 		NEROVNOST,
 		ROVNOST,
-		CARKA,
-		STREDNIK,
-		LEVA_ZAV,
-		PRAVA_ZAV,
-		KEYWORD,
 		NUMBER_DOUBLE,
-		NUMBER_INT
+		NUMBER_INT,
+		ASC,		//KLICOVA SLOVA
+		DECLARE,
+		DIM,
+		DOUBLE,
+		END,
+		CHR,
+		IF,
+		INPUT,
+		LOOP,
+		PRINT,
+		SCOPE,
+		STRING,
+		WHILE,
+		AND,
+		tCONTINUE,
+		ELSEIF,
+		tFALSE,
+		FOR,
+		NOT,
+		OR,
+		STATIC,
+		tTRUE,
+		INTEGER,
+		AS,
+		DO,
+		ELSE,
+		FUNCTION,
+		LENGHT,
+		RETURN,
+		THEN,
+		tBOOLEAN,
+		EXIT,
+		NEXT,
+		SHARED,
+		SUBSTR,
 	} Ttoken;
 
 	typedef struct {
@@ -40,6 +82,8 @@ typedef enum {
 			char* string_hodnota;
 		};
 	} token;
+
+    token* returned;
 
 	token* GetToken(FILE* soubor);
 	int AllowedNextChar(char znak);

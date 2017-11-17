@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef STRING
-#define STRING
+#ifndef STRINGFILE
+#define STRINGFILE
 
 typedef struct
 {

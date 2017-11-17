@@ -12,7 +12,6 @@ int main (int argc, char **argv) {
 	}
 
 	//otevreni souboru
-	static FILE *soubor;
 
 	char *nazev = argv[1];
 	soubor = fopen(nazev,"rt");
@@ -21,7 +20,15 @@ int main (int argc, char **argv) {
 		    exit(1);
 		}
 
-    Parse();
+    token* tok = GetToken(soubor);
+    while (tok->type!=tEOF)
+    {
+        PrintToken(tok);
+        tok = GetToken(soubor);
+    }
+    PrintToken(tok);
+
+   //printf("%d\n",Parse());
 
 	fclose (soubor);
 	return 1;
@@ -32,9 +39,23 @@ int Parse()
     return Program();
 }
 
-int Program()
+void DeleteEOL()//Smazani znaku noveho radku
 {
     token* tok=GetToken(soubor);
+    PrintToken(tok);
+    while (tok->type==tEOL)
+    {
+        tok = GetToken(soubor);
+        PrintToken(tok);
+    }
+    UngetToken(tok);
+}
+
+int Program()//Program
+{
+    DeleteEOL();
+    token* tok=GetToken(soubor);
+    PrintToken(tok);
     if (tok->type==tEOF)
     {
         return 1;
@@ -46,17 +67,11 @@ int Program()
     }
 }
 
-int Main()
+int Main()//Hlavni telo programu
 {
     token* tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"scope")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type!=SCOPE)
     {
         return 0;
     }
@@ -66,69 +81,54 @@ int Main()
         return 0;
 
     tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"end")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type!=END)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
+    PrintToken(tok);
+    if (tok->type!=SCOPE)
     {
-        if (strcmp(tok->string_hodnota,"scope")!=0)
-        {
-            return 0;
-        }
+        return 0;
     }
-    else
+    tok=GetToken(soubor);
+    PrintToken(tok);
+    if (tok->type!=tEOL)
     {
         return 0;
     }
     return 1;
 }
 
-int FunDec()
+int FunDec()//Deklarace funkce
 {
+    DeleteEOL();
     token* tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"declare")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type==DECLARE)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"function")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type==FUNCTION)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
+    PrintToken(tok);
     if (tok->type!=ID)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
-    if (tok->type!=LEVA_ZAV)
+    PrintToken(tok);
+    if (tok->type!=KULATA_ZAV_ZAC)
     {
         return 0;
     }
@@ -138,31 +138,28 @@ int FunDec()
         return 0;
 
     tok=GetToken(soubor);
-    if (tok->type!=PRAVA_ZAV)
+    PrintToken(tok);
+    if (tok->type!=KULATA_ZAV_KON)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"as")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type==AS)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
+    PrintToken(tok);
     if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
     {
         return 0;
     }
 
     tok=GetToken(soubor);
+    PrintToken(tok);
     if (tok->type!=tEOL)
     {
         return 0;
@@ -171,29 +168,26 @@ int FunDec()
     return 1;
 }
 
-int FunDef()
+int FunDef()//Definice funkce
 {
+    DeleteEOL();
     token* tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"function")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type==FUNCTION)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
+    PrintToken(tok);
     if (tok->type!=ID)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
-    if (tok->type!=LEVA_ZAV)
+    PrintToken(tok);
+    if (tok->type!=KULATA_ZAV_ZAC)
     {
         return 0;
     }
@@ -203,25 +197,21 @@ int FunDef()
         return 0;
 
     tok=GetToken(soubor);
-    if (tok->type!=PRAVA_ZAV)
+    PrintToken(tok);
+    if (tok->type!=KULATA_ZAV_KON)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"as")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type==AS)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
+    PrintToken(tok);
     if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
     {
         return 0;
@@ -232,38 +222,28 @@ int FunDef()
         return 0;
 
     tok=GetToken(soubor);
+    PrintToken(tok);
     if (tok->type!=tEOL)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"end")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type==END)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"function")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type==FUNCTION)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
+    PrintToken(tok);
     if (tok->type!=tEOL)
     {
         return 0;
@@ -272,15 +252,16 @@ int FunDef()
     return 1;
 }
 
-int FunPars()
+int FunPars()//Parametry funkci
 {
     token* tok=GetToken(soubor);
+    PrintToken(tok);
     if (tok->type==ID)
     {
         UngetToken(tok);
         return (Par() && ParNext());
     }
-    else if (tok->type==PRAVA_ZAV)
+    else if (tok->type==KULATA_ZAV_KON)
     {
         UngetToken(tok);
         return 1;
@@ -288,72 +269,68 @@ int FunPars()
     return 0;
 }
 
-int Fun()
+int Fun()//Deklarace a definice funkci
 {
-    //ukoncit deklarace a definice
-    int fdec=0;
-    int fdef=0;
+    int fdec=1;
+    int fdef=1;
     token* tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
+    PrintToken(tok);
+    if (tok->type==SCOPE)
     {
-        if (strcmp(tok->string_hodnota,"declare")==0)
-        {
-            UngetToken(tok);
-            fdec=FunDec();
-        }
+        UngetToken(tok);
+        return 1;
+    }
+    if (tok->type==DECLARE)
+    {
+        UngetToken(tok);
+        fdec=FunDec();
     }
 
-    tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
+    if (tok->type==FUNCTION)
     {
-        if (strcmp(tok->string_hodnota,"function")==0)
-        {
-            UngetToken(tok);
-            fdef= FunDef();
-        }
+        UngetToken(tok);
+        fdef= FunDef();
     }
+    UngetToken(tok);
     return (Fun() && fdef && fdec);
 
 }
 
-int Par()
+int Par()//Parametr funkce
 {
     token* tok=GetToken(soubor);
+    PrintToken(tok);
     if (tok->type!=ID)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"as")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type==AS)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
+    PrintToken(tok);
     if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
     {
         return 0;
     }
 
-    tok=GetToken(soubor);
-    if (tok->type!=tEOL)
-    {
-        return 0;
-    }
     return 1;
 }
 
-int ParNext()
+int ParNext()//Dalsi parametr funkce
 {
     token* tok=GetToken(soubor);
+    PrintToken(tok);
+    if (tok->type==KULATA_ZAV_KON)
+    {
+        UngetToken(tok);
+        return 1;
+    }
     if (tok->type!=CARKA)
     {
         return 0;
@@ -363,35 +340,192 @@ int ParNext()
     if (i==0)
         return 0;
 
-    tok=GetToken(soubor);
-    if (tok->type==CARKA)
-    {
-        UngetToken(tok);
-        return ParNext();
-    }
+    return ParNext();
+}
 
-    tok=GetToken(soubor);
-    if (tok->type==PRAVA_ZAV)
+int Stat()//Blok prikazu
+{
+    DeleteEOL();
+    int i=S();
+    if (i==0)
+        return 0;
+
+    token* tok=GetToken(soubor);
+    PrintToken(tok);
+    if (tok->type==LOOP)
     {
         UngetToken(tok);
         return 1;
     }
-    return 0;
+    else if (tok->type==END)
+    {
+        UngetToken(tok);
+        return 1;
+    }
+    return Stat();
 }
 
-int Stat()
+int S()//Prikaz
 {
-    return 0;
-}
+    DeleteEOL();
+    token* tok=GetToken(soubor);
+    PrintToken(tok);
+    if (tok->type==DIM)//Deklarace promenne
+    {
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=ID)
+        {
+            return 0;
+        }
 
-int S()
-{
-    return 0;
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=AS)
+        {
+            return 0;
+        }
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
+        {
+            return 0;
+        }
+
+        int i=I();
+        if (i==0)
+            return 0;
+
+        return 1;
+    }
+    else if (tok->type==ID) //Prirazeni ID=E
+    {
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=ROVNOST)
+        {
+            return 0;
+        }
+        return E();
+    }
+    else if (tok->type==INPUT)//INPUT ID
+    {
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=ID)
+        {
+            return 0;
+        }
+    }
+    else if (tok->type==PRINT)//PRINT OUT
+    {
+        return Out();
+    }
+    else if (tok->type==RETURN)//RETURN E
+    {
+        return E();
+    }
+    else if (tok->type==IF)//If else
+    {
+        int i=E();
+        if (i==0)
+            return 0;
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=THEN)
+        {
+            return 0;
+        }
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=tEOL)
+        {
+            return 0;
+        }
+
+        i=Stat();
+        if (i==0)
+            return 0;
+
+        i=Else();
+        if (i==0)
+            return 0;
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=END)
+        {
+            return 0;
+        }
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=IF)
+        {
+            return 0;
+        }
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=tEOL)
+        {
+            return 0;
+        }
+    }
+    else if (tok->type==DO)//DO WHILE E Stat LOOP
+    {
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=WHILE)
+        {
+            return 0;
+        }
+
+        int i=E();
+        if (i==0)
+            return 0;
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=tEOL)
+        {
+            return 0;
+        }
+
+        i=Stat();
+        if (i==0)
+            return 0;
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=LOOP)
+        {
+            return 0;
+        }
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=tEOL)
+        {
+            return 0;
+        }
+    }
+    return 1;
 }
 
 int I()
 {
-    return 0;
+    token* tok=GetToken(soubor);
+    PrintToken(tok);
+    if (tok->type==ROVNOST)
+    {
+        return E();
+    }
+    UngetToken(tok);
+    return 1;
 }
 
 int E()
@@ -402,29 +536,22 @@ int E()
 int Else()
 {
     token* tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
+    PrintToken(tok);
+    if (tok->type==END)
     {
-        if (strcmp(tok->string_hodnota,"end")==0)
-        {
-            UngetToken(tok);
-            return 1;
-        }
+        UngetToken(tok);
+        return 1;
     }
 
     tok=GetToken(soubor);
-    if (tok->type==KEYWORD)
-    {
-        if (strcmp(tok->string_hodnota,"else")!=0)
-        {
-            return 0;
-        }
-    }
-    else
+    PrintToken(tok);
+    if (tok->type==ELSE)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
+    PrintToken(tok);
     if (tok->type!=tEOL)
     {
         return 0;
@@ -439,5 +566,16 @@ int Else()
 
 int Out()
 {
-    return 0;
+    int i=E();
+    if (i==0)
+        return 0;
+
+    token* tok=GetToken(soubor);
+    PrintToken(tok);
+    if (tok->type==STREDNIK)
+    {
+        return Out();
+    }
+    UngetToken(tok);
+    return 1;
 }
