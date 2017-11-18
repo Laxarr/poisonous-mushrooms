@@ -124,10 +124,12 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 0;
 						 }
 
-					else if (znak == 92) {
-						state = 0;
-						 }
-
+					else if (znak == 92) {  //jsem zpetne lomitko "\"
+						tok->type = CELO_CIS_DELENI;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;	}
+						 
 					else if (znak == '\n') {
 						state = 0;
 						 }
