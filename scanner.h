@@ -2,14 +2,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-
-#ifndef SCANNER
-#define SCANNER
-
 #include "string.h"
 
 typedef enum {
-        tEOF,
+		tEOF,
 		tEOL,
 		MOCNICI_STRIZKA,
 		TECKA,
@@ -35,10 +31,11 @@ typedef enum {
 		MENSI_ROVNO,
 		NEROVNOST,
 		ROVNOST,
+		KEYWORD,
 		NUMBER_DOUBLE,
 		NUMBER_INT,
 		ASC,		//KLICOVA SLOVA
-		DECLARE,
+		DECLARE,  
 		DIM,
 		DOUBLE,
 		END,
@@ -83,9 +80,5 @@ typedef enum {
 		};
 	} token;
 
-    token* returned;
-
 	token* GetToken(FILE* soubor);
 	int AllowedNextChar(char znak);
-    void UngetToken(token* tok);
-#endif
