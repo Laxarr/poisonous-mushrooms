@@ -380,6 +380,11 @@ int Stat()//Blok prikazu
         UngetToken(tok);
         return 1;
     }
+    else if (tok->type==ELSE)
+    {
+        UngetToken(tok);
+        return 1;
+    }
     else if (tok->type==END)
     {
         UngetToken(tok);
@@ -554,7 +559,33 @@ int I()
 
 int E()
 {
-    return 0;
+    token* tok=GetToken(soubor);
+    PrintToken(tok);
+    if (tok->type==ID)//volani funkce
+    {
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type==KULATA_ZAV_ZAC)
+        {
+            int i=FunPars();
+            if (i==0)
+                return 0;
+
+            tok=GetToken(soubor);
+            PrintToken(tok);
+            if (tok->type!=KULATA_ZAV_KON)
+            {
+                return 0;
+            }
+            tok=GetToken(soubor);
+            PrintToken(tok);
+            if (tok->type!=tEOL)
+            {
+                return 0;
+            }
+        }
+    }
+    return 1;
 }
 
 int Else()
@@ -567,9 +598,7 @@ int Else()
         return 1;
     }
 
-    tok=GetToken(soubor);
-    PrintToken(tok);
-    if (tok->type==ELSE)
+    if (tok->type!=ELSE)
     {
         return 0;
     }
@@ -599,6 +628,10 @@ int Out()
     if (tok->type==STREDNIK)
     {
         return Out();
+    }
+    else if (tok->type!=tEOL)
+    {
+        return 0;
     }
     UngetToken(tok);
     return 1;

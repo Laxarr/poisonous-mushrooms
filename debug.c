@@ -146,9 +146,9 @@ void PrintToken(token* tok)
     {
         printf("; ");
     }
-    else if (tok->type==LENGHT)
+    else if (tok->type==LENGTH)
     {
-        printf("LENGHT ");
+        printf("LENGTH ");
     }
     else if (tok->type==DOUBLE)
     {
@@ -169,5 +169,9 @@ void PrintToken(token* tok)
     else if (tok->type==SUBSTR)
     {
         printf("SUBSTR ");
+    }
+    else if (tok->type==CARKA)
+    {
+        printf(", ");
     }
 }
