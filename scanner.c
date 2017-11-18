@@ -7,7 +7,7 @@ void UngetToken(token* tok)
 
 int Is_Keyword(const char *nacteny_text) {
 	char *array[35] = {"as", "asc", "declare", "do", "dim", "double", "else", "end", "chr", "function", "if", "input",
-	 "length", "loop", "print", "return", "scope", "string", "then", "while", "and", "boolean",
+	 "lenght", "loop", "print", "return", "scope", "string", "then", "while", "and", "boolean",
 	 "continue", "elseif", "exit", "false", "for", "next", "not", "or", "shared", "static", "true", "substr", "integer"} ;
 
 	for (int n = 0; n < 35; n++) {
@@ -20,7 +20,7 @@ int Is_Keyword(const char *nacteny_text) {
 
 int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mnozine povolenych znaku napr. 123+14 ,zde to plus
 	if ((znak==';') || (znak=='/') || (znak=='*') || (znak=='+') || (znak=='-') || (znak==')') || (znak=='=')
-		|| (znak=='>') || (znak=='<') || (znak==',') || (isspace (znak)) || (znak == EOF))
+		|| (znak=='>') || (znak=='<') || (znak==',') || (isspace(znak)) || (znak == EOF))
 		return 0;
 	else
 		return 1;
@@ -44,24 +44,27 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 	int pouze_jedno_e = 0; 			//v dc bude pouze jedno 'e', pripadne 'E'
 	int pouze_jedno_znamenko = 0;	//v dc bude pouze jedno '+', pripadne '-'
 	int na_konci_je_cislice = 0;	//zajistuje, ze cc nebo dc bude koncit cislici
+	int ne_zac_nula = 0;
+	int pocitadlo_nul = 0;
+	int zacatek_bezNuly = 0;
 
     int state = 0; //Konecny automat
 
 	while(42) {
 
 	znak = fgetc(soubor);
-    if (znak>64 && znak<91)
-    {
-        znak+=32;
-    }
-    //if (znak=='\n') break;
-					// mozna udelat token i pro znak == eof, to tady teda neni ; ted tady je
-	//printf("%c\n", znak);
 
 		switch (state) {
 			case 0:
-					if (isdigit(znak)) {
+					if ((isdigit(znak)) && (znak != '0')) {
 						AddChar(buff, znak);
+						zacatek_bezNuly = 1;
+						na_konci_je_cislice = 1;
+						state = 1; }
+
+					else if ((isdigit(znak)) && (znak == '0')) {
+						pocitadlo_nul = 1;
+						na_konci_je_cislice = 1;
 						state = 1; }
 
 					else if (znak == EOF) {
@@ -73,7 +76,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 					else if (isalpha(znak)) {
 						state = 5;
-						AddChar(buff, znak); }
+						AddChar(buff, tolower(znak)); }
 
 					else if (isspace(znak)) { state = 0;
 						if (znak == '\n') {
@@ -113,21 +116,25 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 
 					else if (znak == '#') {
-						state = 0;
+						state = 9;
 					}
 
 					else if (znak == '\0') {
+						printf("zaddscccek\n");
 						state = 0;
 						 }
 
 					else if (znak == 92) {
+						printf("zaddseeeek\n");
 						state = 0;
 						 }
 
 					else if (znak == '\n') {
+						printf("zaddaasek\n");
 						state = 0;
 						 }
 					else if (znak == '!') {
+						printf("staaaate 2\n");
 						state = 10;
 						AddChar(buff, znak);
 					}
@@ -259,9 +266,18 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					break;
 
 			case 1: //CELE CISLO
-					if (isdigit(znak)) { 				//je to cislice
+					if (((isdigit(znak)) && (ne_zac_nula == 1)) || (((isdigit(znak)) && (znak != '0')))){ 	//je to cislice
+						ne_zac_nula = 1;
 						na_konci_je_cislice = 1;		//pokud ted bude konec je cislo v poradku
 						AddChar(buff, znak);			//ulozeni do bufferu
+					}
+					else if ((isdigit(znak)) && (znak == '0')) {
+						if (zacatek_bezNuly == 1) {
+							AddChar(buff, znak);
+						}
+						else {
+							na_konci_je_cislice = 1;
+						}
 					}
 
 					else if ((znak == '.') && (na_konci_je_cislice != 0)) {	//je tam tecka -> je to des. cislo; musi pred nim byt cislice
@@ -272,23 +288,31 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 					else if (((znak == 'e') || (znak == 'E')) && (na_konci_je_cislice != 0)) {  // je to E nebo e ; musi pred nim byt cislice
 						state = 2;								// bude to deset. cislo
+						if (pocitadlo_nul == 1) {
+							AddChar(buff, 0);
+						}
 						pouze_jedno_e += 1;						// zajisti pouze jedno e
 						na_konci_je_cislice = 0;				// pokud ted bude konec nejedna se o spravne zapsane cislo
 						AddChar(buff, znak);					// ulozeni do bufferu
-
 					}
 
 					else if ((na_konci_je_cislice == 1) && (AllowedNextChar(znak) == 0)) {     // && kdyz je znak == ; , } ] )= // `... pak ungec(znak) jine znaky nepoustet
 						ungetc(znak, soubor);
+						if ((zacatek_bezNuly == 0) && (pocitadlo_nul == 1) && (ne_zac_nula == 0)) {
+							AddChar(buff, 48);
+						}
 						tok->type = NUMBER_INT;
 						tok->int_hodnota = atoi(GetStringBuffer(buff));
-					FreeBuffer(buff);
-					free(buff);
+						printf("%s\n",buff->str);
+
+						FreeBuffer(buff);
+						free(buff);
 					return tok;
 					}
 
 
 					else {
+						printf("error2\n");
 						return tok;
 						//zbudou nepovolene znaky hod error
 					}
@@ -318,6 +342,8 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					ungetc(znak, soubor);
 					tok->type = NUMBER_DOUBLE;
 					tok->double_hodnota = strtod(GetStringBuffer(buff), NULL);
+
+					printf("%s\n",buff->str);
 					FreeBuffer(buff);
 					free(buff);
 					return tok;
@@ -380,7 +406,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						else if (neco==28) { tok->type = NOT;} 		else if (neco==29) { tok->type = OR;} 	  else if (neco==30) { tok->type = SHARED;}
 						else if (neco==31) { tok->type = STATIC;} 	else if (neco==32) { tok->type = tTRUE;}  else if (neco==33) { tok->type = SUBSTR;}
 						else if (neco==34) { tok->type = INTEGER;} 	else if (neco== 0) { tok->type = AS;}
-
 							FreeBuffer(buff);
 							free(buff);
 							return tok;
@@ -401,12 +426,12 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 6; }
 
 					else {
-						AddChar(buff, znak);}
+						AddChar(buff, tolower(znak));}
 					break;
 
 			case 6: // je to ID
 					if ((isalpha(znak)) || (isdigit(znak)) || (znak == '_')) {
-						AddChar(buff, znak);
+						AddChar(buff, tolower(znak));
 					}
 
 					else {
@@ -421,6 +446,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 					break;
 			case 7:
+					printf("state 2\n");
 					state = 0;
 					break;
 			case 8:
@@ -454,6 +480,9 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 			case 11: //stringovy literal 2/2
 					 if (znak == '"')  {
 					 		AddChar(buff, znak);
+
+					 		printf("%s\n",buff->str);
+
 					 		tok->type = RETEZEC;
 							tok->string_hodnota = realloc(tok->string_hodnota, buff->lenght);
 							strcpy(tok->string_hodnota, buff->str);
@@ -466,6 +495,10 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					 else if (znak == '#') {
 					 		printf("tohle neni retezec\n");
 					 		 return tok; }
+					 else if (znak == 92) {
+					 	printf("flasinet\n");
+					 	AddChar(buff, znak);
+					 }
 					 else {
 					 		AddChar(buff, znak);
 					 }
