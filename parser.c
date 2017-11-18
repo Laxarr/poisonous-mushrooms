@@ -19,7 +19,7 @@ int main (int argc, char **argv) {
 		    fprintf(stderr, "soubor nelze otevrit!\n");
 		    exit(1);
 		}
-
+/*
     token* tok = GetToken(soubor);
     while (tok->type!=tEOF)
     {
@@ -27,8 +27,8 @@ int main (int argc, char **argv) {
         tok = GetToken(soubor);
     }
     PrintToken(tok);
-
-   //printf("%d\n",Parse());
+*/
+    printf("%d\n",Parse());
 
 	fclose (soubor);
 	return 1;
@@ -69,6 +69,7 @@ int Program()//Program
 
 int Main()//Hlavni telo programu
 {
+    DeleteEOL();
     token* tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type!=SCOPE)
@@ -107,14 +108,14 @@ int FunDec()//Deklarace funkce
     DeleteEOL();
     token* tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==DECLARE)
+    if (tok->type!=DECLARE)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==FUNCTION)
+    if (tok->type!=FUNCTION)
     {
         return 0;
     }
@@ -146,14 +147,14 @@ int FunDec()//Deklarace funkce
 
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==AS)
+    if (tok->type!=AS)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
+    if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
     {
         return 0;
     }
@@ -173,7 +174,7 @@ int FunDef()//Definice funkce
     DeleteEOL();
     token* tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==FUNCTION)
+    if (tok->type!=FUNCTION)
     {
         return 0;
     }
@@ -205,14 +206,14 @@ int FunDef()//Definice funkce
 
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==AS)
+    if (tok->type!=AS)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
+    if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
     {
         return 0;
     }
@@ -221,23 +222,23 @@ int FunDef()//Definice funkce
     if (i==0)
         return 0;
 
-    tok=GetToken(soubor);
+    /*tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type!=tEOL)
     {
         return 0;
-    }
+    }*/
 
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==END)
+    if (tok->type!=END)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==FUNCTION)
+    if (tok->type!=FUNCTION)
     {
         return 0;
     }
@@ -271,8 +272,9 @@ int FunPars()//Parametry funkci
 
 int Fun()//Deklarace a definice funkci
 {
-    int fdec=1;
-    int fdef=1;
+    DeleteEOL();
+    int fdec=-1;
+    int fdef=-1;
     token* tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type==SCOPE)
@@ -285,11 +287,32 @@ int Fun()//Deklarace a definice funkci
         UngetToken(tok);
         fdec=FunDec();
     }
+    if (fdec==1)
+    {
+        tok=GetToken(soubor);
+        PrintToken(tok);
+    }
 
     if (tok->type==FUNCTION)
     {
         UngetToken(tok);
         fdef= FunDef();
+    }
+
+    if (fdef==1)
+    {
+        tok=GetToken(soubor);
+        PrintToken(tok);
+    }
+
+    if (fdec==-1)
+    {
+        fdec=1;
+    }
+
+    if (fdef==-1)
+    {
+        fdef=1;
     }
     UngetToken(tok);
     return (Fun() && fdef && fdec);
@@ -307,14 +330,14 @@ int Par()//Parametr funkce
 
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==AS)
+    if (tok->type!=AS)
     {
         return 0;
     }
 
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
+    if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
     {
         return 0;
     }
@@ -388,7 +411,7 @@ int S()//Prikaz
 
         tok=GetToken(soubor);
         PrintToken(tok);
-        if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
+        if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
         {
             return 0;
         }
@@ -513,6 +536,7 @@ int S()//Prikaz
             return 0;
         }
     }
+    UngetToken(tok);
     return 1;
 }
 

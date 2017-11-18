@@ -7,7 +7,7 @@ void UngetToken(token* tok)
 
 int Is_Keyword(const char *nacteny_text) {
 	char *array[35] = {"as", "asc", "declare", "do", "dim", "double", "else", "end", "chr", "function", "if", "input",
-	 "lenght", "loop", "print", "return", "scope", "string", "then", "while", "and", "boolean",
+	 "length", "loop", "print", "return", "scope", "string", "then", "while", "and", "boolean",
 	 "continue", "elseif", "exit", "false", "for", "next", "not", "or", "shared", "static", "true", "substr", "integer"} ;
 
 	for (int n = 0; n < 35; n++) {
@@ -34,6 +34,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
             returned=NULL;
             return pom;
         }
+
     buffer* buff = (buffer*) malloc(sizeof(buffer));
    	InitBuffer(buff);
     token* tok = (token*) malloc(sizeof(token));
@@ -390,14 +391,14 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 			case 5: // klicove slovo
 					if ((!isalpha(znak)) && (!isdigit(znak)) && (znak != '_')) {
 						ungetc (znak, soubor);
-
+                        buff->str[buff->lenght]='\0';
 						int neco = Is_Keyword(GetStringBuffer(buff));
 						if (neco != 1066) {	// je to keyword
 
 						if (neco==1) { tok->type = ASC;} 		else if (neco==2) { tok->type = DECLARE;}  		else if (neco==3) { tok->type = DO;}
 						else if (neco==4) { tok->type = DIM;} 	else if (neco==5) { tok->type = DOUBLE;} 	else if (neco==6) { tok->type = ELSE;}
 						else if (neco==7) { tok->type = END;} 	else if (neco==8) { tok->type = CHR;}		else if (neco==9) { tok->type = FUNCTION;}
-						else if (neco==10) { tok->type = IF;} 	else if (neco==11) { tok->type = INPUT;} 	else if (neco==12) { tok->type = LENGHT;}
+						else if (neco==10) { tok->type = IF;} 	else if (neco==11) { tok->type = INPUT;} 	else if (neco==12) { tok->type = LENGTH;}
 						else if (neco==13) { tok->type = LOOP;} else if (neco==14) { tok->type = PRINT;} 	else if (neco==15) { tok->type = RETURN;}
 						else if (neco==16) { tok->type = SCOPE;} else if (neco==17) { tok->type = STRING;} 	else if (neco==18) { tok->type = THEN;}
 						else if (neco==19) { tok->type = WHILE;} else if (neco==20) { tok->type = AND;} 	else if (neco==21) { tok->type = tBOOLEAN;}

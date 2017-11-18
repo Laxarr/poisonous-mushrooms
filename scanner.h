@@ -64,7 +64,7 @@ typedef enum {
 		DO,
 		ELSE,
 		FUNCTION,
-		LENGHT,
+		LENGTH,
 		RETURN,
 		THEN,
 		tBOOLEAN,
