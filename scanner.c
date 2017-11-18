@@ -121,21 +121,17 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 
 					else if (znak == '\0') {
-						printf("zaddscccek\n");
 						state = 0;
 						 }
 
 					else if (znak == 92) {
-						printf("zaddseeeek\n");
 						state = 0;
 						 }
 
 					else if (znak == '\n') {
-						printf("zaddaasek\n");
 						state = 0;
 						 }
 					else if (znak == '!') {
-						printf("staaaate 2\n");
 						state = 10;
 						AddChar(buff, znak);
 					}
@@ -304,8 +300,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						}
 						tok->type = NUMBER_INT;
 						tok->int_hodnota = atoi(GetStringBuffer(buff));
-						printf("%s\n",buff->str);
-
 						FreeBuffer(buff);
 						free(buff);
 					return tok;
@@ -343,8 +337,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					ungetc(znak, soubor);
 					tok->type = NUMBER_DOUBLE;
 					tok->double_hodnota = strtod(GetStringBuffer(buff), NULL);
-
-					printf("%s\n",buff->str);
 					FreeBuffer(buff);
 					free(buff);
 					return tok;
@@ -481,9 +473,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 			case 11: //stringovy literal 2/2
 					 if (znak == '"')  {
 					 		AddChar(buff, znak);
-
-					 		printf("%s\n",buff->str);
-
 					 		tok->type = RETEZEC;
 							tok->string_hodnota = realloc(tok->string_hodnota, buff->lenght);
 							strcpy(tok->string_hodnota, buff->str);
@@ -497,7 +486,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					 		printf("tohle neni retezec\n");
 					 		 return tok; }
 					 else if (znak == 92) {
-					 	printf("flasinet\n");
 					 	AddChar(buff, znak);
 					 }
 					 else {

@@ -567,12 +567,28 @@ int E()
         PrintToken(tok);
         if (tok->type==KULATA_ZAV_ZAC)
         {
-            int i=FunPars();
-            if (i==0)
-                return 0;
-
             tok=GetToken(soubor);
             PrintToken(tok);
+            while(tok->type!=KULATA_ZAV_KON)
+            {
+                if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
+                {
+                return 0;
+                }
+                tok=GetToken(soubor);
+                PrintToken(tok);
+                if (tok->type==KULATA_ZAV_KON)
+                {
+                    break;
+                }
+                if (tok->type!=CARKA)
+                {
+                return 0;
+                }
+                tok=GetToken(soubor);
+                PrintToken(tok);
+            }
+
             if (tok->type!=KULATA_ZAV_KON)
             {
                 return 0;
