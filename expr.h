@@ -6,5 +6,8 @@
 #ifndef EXPR
 #define EXPR
 
+#include "parser.h"
+
+int Expr_Analysis();
 
 #endif
