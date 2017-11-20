@@ -21,12 +21,14 @@ int Par();
 int ParNext();
 int Stat();
 int S();
-int I();
 int E();
 int Else();
 int Out();
 void DeleteEOL();
 FILE* soubor;
-extern Sym_Tab* GlobalST;
-extern Sym_Tab* CurrentST;
+Sym_Tab* GlobalST;
+Sym_Tab* CurrentST;
+int declared;
+char* currentfun;
+char* currentvar;
 #endif

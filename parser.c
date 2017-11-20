@@ -1,6 +1,4 @@
 #include "parser.h"
-Sym_Tab* GlobalST=NULL;
-Sym_Tab* CurrentST=NULL;
 
 int main (int argc, char **argv) {
 	//argument bude název souboru
@@ -38,6 +36,7 @@ int main (int argc, char **argv) {
 
 int Parse()
 {
+    GlobalST=sym_tab_init();
     return Program();
 }
 
@@ -71,6 +70,11 @@ int Program()//Program
 
 int Main()//Hlavni telo programu
 {
+    SymTab_Element* pom=create_sym_tab_elem_fun("main",SymTab_DataType_Void);
+    sym_tab_insert(GlobalST,pom);
+    CurrentST=pom->localtable;
+    currentfun="main";
+
     DeleteEOL();
     token* tok=GetToken(soubor);
     PrintToken(tok);
@@ -129,6 +133,17 @@ int FunDec()//Deklarace funkce
         return 0;
     }
 
+    char* idfunkce=tok->string_hodnota;
+    if (sym_tab_find(GlobalST,idfunkce)!=NULL)
+    {
+        return 0;
+    }
+    declared=0;
+    currentfun=idfunkce;
+    SymTab_Element* pom=create_sym_tab_elem_fun(idfunkce,SymTab_DataType_Void);
+    sym_tab_insert(GlobalST,pom);
+    CurrentST=pom->localtable;
+
     tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type!=KULATA_ZAV_ZAC)
@@ -159,6 +174,20 @@ int FunDec()//Deklarace funkce
     if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
     {
         return 0;
+    }
+
+    pom=sym_tab_find(GlobalST,idfunkce);
+    if (tok->type==STRING)
+    {
+        pom->data_type=SymTab_DataType_String;
+    }
+    else if (tok->type==DOUBLE)
+    {
+        pom->data_type=SymTab_DataType_Double;
+    }
+    else if (tok->type==INTEGER)
+    {
+        pom->data_type=SymTab_DataType_Integer;
     }
 
     tok=GetToken(soubor);
@@ -188,6 +217,24 @@ int FunDef()//Definice funkce
         return 0;
     }
 
+    char* idfunkce=tok->string_hodnota;
+    currentfun=idfunkce;
+    SymTab_Element* pom=sym_tab_find(GlobalST,idfunkce);
+    {
+        if (pom==NULL)
+        {
+            declared=0;
+            pom=create_sym_tab_elem_fun(idfunkce,SymTab_DataType_Void);
+            sym_tab_insert(GlobalST,pom);
+            CurrentST=pom->localtable;
+        }
+        else
+        {
+            declared=1;
+            CurrentST=pom->localtable;
+        }
+    }
+
     tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type!=KULATA_ZAV_ZAC)
@@ -218,6 +265,41 @@ int FunDef()//Definice funkce
     if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
     {
         return 0;
+    }
+
+    pom=sym_tab_find(GlobalST,idfunkce);
+    if (declared==0)
+    {
+        if (tok->type==STRING)
+        {
+            pom->data_type=SymTab_DataType_String;
+        }
+        else if (tok->type==DOUBLE)
+        {
+            pom->data_type=SymTab_DataType_Double;
+        }
+        else if (tok->type==INTEGER)
+        {
+            pom->data_type=SymTab_DataType_Integer;
+        }
+    }
+    else
+    {
+        if (tok->type==STRING)
+        {
+            if (pom->data_type!=SymTab_DataType_String)
+                return 0;
+        }
+        else if (tok->type==DOUBLE)
+        {
+            if (pom->data_type!=SymTab_DataType_Double)
+                return 0;
+        }
+        else if (tok->type==INTEGER)
+        {
+            if (pom->data_type!=SymTab_DataType_Integer)
+            return 0;
+        }
     }
 
     i=Stat();
@@ -327,6 +409,7 @@ int Fun()//Deklarace a definice funkci
 
 int Par()//Parametr funkce
 {
+
     token* tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type!=ID)
@@ -334,6 +417,15 @@ int Par()//Parametr funkce
         return 0;
     }
 
+    char* idpar=tok->string_hodnota;
+    if (declared==1)
+    {
+        SymTab_Element* pom=sym_tab_find(CurrentST,idpar);
+        if (pom==NULL)
+        {
+            return 0;
+        }
+    }
     tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type!=AS)
@@ -347,6 +439,32 @@ int Par()//Parametr funkce
     {
         return 0;
     }
+
+    SymTab_DataType typ;
+    if (tok->type==STRING)
+    {
+        typ=SymTab_DataType_String;
+    }
+    else if (tok->type==DOUBLE)
+    {
+        typ=SymTab_DataType_Double;
+    }
+    else if (tok->type==INTEGER)
+    {
+        typ=SymTab_DataType_Integer;
+    }
+    if (declared==1)
+    {
+        SymTab_Element* pom=sym_tab_find(CurrentST,idpar);
+        if (pom->data_type!=typ)
+        {
+            return 0;
+        }
+    }
+    SymTab_Element* pom=create_sym_tab_elem_fun(idpar,typ);
+    sym_tab_insert(CurrentST,pom);
+    pom=sym_tab_find(GlobalST,currentfun);
+    pom->paramcount++;
 
     return 1;
 }
@@ -413,6 +531,13 @@ int S()//Prikaz
             return 0;
         }
 
+        char* varid=tok->string_hodnota;
+        SymTab_Element* pom=sym_tab_find(CurrentST,varid);
+        if (pom!=NULL)
+        {
+            return 0;
+        }
+
         tok=GetToken(soubor);
         PrintToken(tok);
         if (tok->type!=AS)
@@ -427,14 +552,41 @@ int S()//Prikaz
             return 0;
         }
 
-        int i=I();
-        if (i==0)
-            return 0;
+        SymTab_DataType typ;
+        if (tok->type==STRING)
+        {
+            typ=SymTab_DataType_String;
+        }
+        else if (tok->type==DOUBLE)
+        {
+            typ=SymTab_DataType_Double;
+        }
+        else if (tok->type==INTEGER)
+        {
+            typ=SymTab_DataType_Integer;
+        }
+
+        pom=create_sym_tab_elem_var(varid,typ);
+        sym_tab_insert(CurrentST,pom);
+
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type==ROVNOST)
+        {
+            currentvar=varid;
+            return E();
+        }
+        UngetToken(tok);
 
         return 1;
     }
     else if (tok->type==ID) //Prirazeni ID=E
     {
+        SymTab_Element* pom=sym_tab_find(CurrentST,tok->string_hodnota);
+        if (pom==NULL)
+        {
+            return 0;
+        }
         tok=GetToken(soubor);
         PrintToken(tok);
         if (tok->type!=ROVNOST)
@@ -451,6 +603,11 @@ int S()//Prikaz
         {
             return 0;
         }
+        SymTab_Element* pom=sym_tab_find(CurrentST,tok->string_hodnota);
+        if (pom==NULL)
+        {
+            return 0;
+        }
     }
     else if (tok->type==PRINT)//PRINT OUT
     {
@@ -458,6 +615,11 @@ int S()//Prikaz
     }
     else if (tok->type==RETURN)//RETURN E
     {
+        int i=strcmp(currentfun,"main");
+        if (i==0)
+        {
+            return 0;
+        }
         return E();
     }
     else if (tok->type==IF)//If else
@@ -546,18 +708,6 @@ int S()//Prikaz
         {
             return 0;
         }
-    }
-    UngetToken(tok);
-    return 1;
-}
-
-int I()
-{
-    token* tok=GetToken(soubor);
-    PrintToken(tok);
-    if (tok->type==ROVNOST)
-    {
-        return E();
     }
     UngetToken(tok);
     return 1;
