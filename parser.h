@@ -7,6 +7,8 @@
 
 #include "scanner.h"
 #include "debug.h"
+#include "symtable.h"
+#include "expr.h"
 
 int Parse();
 int Program();
@@ -25,4 +27,6 @@ int Else();
 int Out();
 void DeleteEOL();
 FILE* soubor;
+extern Sym_Tab* GlobalST;
+extern Sym_Tab* CurrentST;
 #endif

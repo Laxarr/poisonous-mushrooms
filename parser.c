@@ -1,4 +1,6 @@
 #include "parser.h"
+Sym_Tab* GlobalST=NULL;
+Sym_Tab* CurrentST=NULL;
 
 int main (int argc, char **argv) {
 	//argument bude název souboru
@@ -286,6 +288,8 @@ int Fun()//Deklarace a definice funkci
     {
         UngetToken(tok);
         fdec=FunDec();
+        if (fdec==0)
+            return 0;
     }
     if (fdec==1)
     {
@@ -297,6 +301,8 @@ int Fun()//Deklarace a definice funkci
     {
         UngetToken(tok);
         fdef= FunDef();
+        if (fdef==0)
+            return 0;
     }
 
     if (fdef==1)
@@ -571,7 +577,7 @@ int E()
             PrintToken(tok);
             while(tok->type!=KULATA_ZAV_KON)
             {
-                if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT))
+                if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT || tok->type==ID))
                 {
                 return 0;
                 }
