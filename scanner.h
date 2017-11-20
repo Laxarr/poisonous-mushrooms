@@ -11,6 +11,7 @@
 typedef enum {
         tEOF,
 		tEOL,
+		CELO_CIS_DELENI,
 		MOCNICI_STRIZKA,
 		TECKA,
 		CARKA,
