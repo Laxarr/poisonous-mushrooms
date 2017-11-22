@@ -26,6 +26,7 @@ typedef struct SymTab_Element
     char* id;
     SymTab_ElemType elem_type;
     SymTab_DataType data_type;
+    int declared;
     int initialized;
     int paramcount;
     struct SymTab_Element *left;
@@ -44,7 +45,5 @@ SymTab_Element* create_sym_tab_elem_var(char* id, SymTab_DataType data);
 Sym_Tab* sym_tab_init();
 int sym_tab_insert(Sym_Tab *table,SymTab_Element* elem);
 SymTab_Element* sym_tab_find(Sym_Tab *table,char* id);
-void sym_tab_free(Sym_Tab *table);
-void print_tree(Sym_Tab *table);
 
 #endif

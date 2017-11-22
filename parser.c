@@ -28,8 +28,8 @@ int main (int argc, char **argv) {
     }
     PrintToken(tok);
 */
-    printf("%d\n",Parse());
-
+    int i=Parse();
+    printf("%d\n",i);
 	fclose (soubor);
 	return 1;
 }
@@ -420,8 +420,7 @@ int Par()//Parametr funkce
     char* idpar=tok->string_hodnota;
     if (declared==1)
     {
-        SymTab_Element* pom=sym_tab_find(CurrentST,idpar);
-        if (pom==NULL)
+        if (sym_tab_find(CurrentST,idpar)==NULL)
         {
             return 0;
         }

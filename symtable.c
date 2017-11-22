@@ -10,32 +10,50 @@ Sym_Tab* sym_tab_init(){
 
 int sym_tab_insert(Sym_Tab *table,SymTab_Element* elem)
 {
-    if (table==NULL)
-    {
+    if (elem==NULL || table==NULL)
         return 0;
-    }
-    if (table->root==NULL)
+    SymTab_Element* pom=table->root;
+    if (pom==NULL)
     {
         table->root=elem;
         return 1;
     }
-    int i=strcmp(elem->id,table->root->id);
-    if (i<0)
-    {
-        Sym_Tab* pom=sym_tab_init();
-        pom->root=table->root->left;
-        return sym_tab_insert(pom,elem);
-    }
-    else if (i>0)
-    {
-        Sym_Tab* pom=sym_tab_init();
-        pom->root=table->root->right;
-        return sym_tab_insert(pom,elem);
-    }
     else
     {
-        return 1;
+        while (pom!=NULL)
+        {
+           int i=strcmp(elem->id,pom->id);
+           if (i==0)
+           {
+               return 1;
+           }
+           else if (i<0)
+           {
+               if (pom->left==NULL)
+               {
+                   pom->left=elem;
+                   return 1;
+               }
+               else
+               {
+                   pom=pom->left;
+               }
+           }
+           else if (i>0)
+           {
+               if (pom->right==NULL)
+               {
+                   pom->right=elem;
+                   return 1;
+               }
+               else
+               {
+                   pom=pom->right;
+               }
+           }
+        }
     }
+    return 0;
 }
 
 SymTab_Element* sym_tab_find(Sym_Tab *table,char* id)
@@ -44,61 +62,31 @@ SymTab_Element* sym_tab_find(Sym_Tab *table,char* id)
     {
         return NULL;
     }
-    if (table->root==NULL)
+    SymTab_Element* pom=table->root;
+    if (pom==NULL)
     {
         return NULL;
     }
-
-    int i=strcmp(id,table->root->id);
-    if (i<0)
-    {
-        Sym_Tab* pom=NULL;
-        pom->root=table->root->left;
-        return sym_tab_find(pom,id);
-    }
-    else if (i>0)
-    {
-        Sym_Tab* pom=NULL;
-        pom->root=table->root->right;
-        return sym_tab_find(pom,id);
-    }
     else
-        return table->root;
-}
-
-void print_tree(Sym_Tab *table)
-{
-    if (table==NULL)
     {
-        return;
+        while (pom!=NULL)
+        {
+           int i=strcmp(id,pom->id);
+           if (i==0)
+           {
+                return pom;
+           }
+           else if (i<0)
+           {
+                pom=pom->left;
+           }
+           else if (i>0)
+           {
+                pom=pom->right;
+           }
+        }
     }
-    if (table->root != NULL)
-    {
-        Sym_Tab* pom=NULL;
-        pom->root=table->root->left;
-        print_tree(pom);
-        printf("%s\n",table->root->id);
-        pom->root=table->root->right;
-        print_tree(pom);
-    }
-}
-
-void sym_tab_free(Sym_Tab *table)
-{
-    if (table==NULL)
-    {
-        return;
-    }
-    if (table->root != NULL)
-    {
-        Sym_Tab* pom=NULL;
-        pom->root=table->root->left;
-        sym_tab_free(pom);
-        pom->root=table->root->right;
-        sym_tab_free(pom);
-        free(pom->root);
-    }
-    table->root=NULL;
+    return NULL;
 }
 
 SymTab_Element* create_sym_tab_elem_par(char* id, SymTab_DataType data)
@@ -113,6 +101,7 @@ SymTab_Element* create_sym_tab_elem_par(char* id, SymTab_DataType data)
         new_elem_ptr->id=id;
         new_elem_ptr->elem_type=SymTab_ElemType_Par;
         new_elem_ptr->data_type=data;
+        new_elem_ptr->declared=0;
         new_elem_ptr->initialized=0;
         new_elem_ptr->left=NULL;
         new_elem_ptr->right=NULL;
@@ -131,6 +120,8 @@ SymTab_Element* create_sym_tab_elem_fun(char* id, SymTab_DataType data)
         new_elem_ptr->id=id;
         new_elem_ptr->elem_type=SymTab_ElemType_Fun;
         new_elem_ptr->data_type=data;
+        new_elem_ptr->declared=0;
+        new_elem_ptr->initialized=0;
         new_elem_ptr->paramcount=0;
         new_elem_ptr->localtable=sym_tab_init();
         new_elem_ptr->left=NULL;
@@ -150,6 +141,7 @@ SymTab_Element* create_sym_tab_elem_var(char* id, SymTab_DataType data)
         new_elem_ptr->id=id;
         new_elem_ptr->elem_type=SymTab_ElemType_Var;
         new_elem_ptr->data_type=data;
+        new_elem_ptr->declared=0;
         new_elem_ptr->initialized=0;
         new_elem_ptr->left=NULL;
         new_elem_ptr->right=NULL;
