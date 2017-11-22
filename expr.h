@@ -7,6 +7,9 @@
 #define EXPR
 
 #include "parser.h"
+#include "INFtoPOST.h"
+#include "stack.h"
+
 
 int Expr_Analysis();
 
