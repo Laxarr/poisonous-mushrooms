@@ -7,7 +7,7 @@
 #define EXPR
 
 #include "parser.h"
-#include "INFtoPOST.h"
+#include "infix_postfix.h"
 #include "stack.h"
 
 
