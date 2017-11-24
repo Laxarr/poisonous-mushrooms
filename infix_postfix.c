@@ -1,5 +1,5 @@
 
-#include "c204.h"
+#include "infix_postfix.h"
 
 int solved;
 tStack* stack;
