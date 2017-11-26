@@ -1,8 +1,13 @@
 #include "codegenerator.h"
-#define STRINGSIZE 20
+#define STRINGSIZE 10
+
+int tempvarcount=0;
+int ifelsecount=0;
+int dowhilecount=0;
+
 void Program_begin()
 {
-    printf(".program\n");
+    printf(".IFJcode17\n");
     printf("JUMP main\n");
 }
 
@@ -10,6 +15,41 @@ void Main_fun()
 {
     printf("LABEL main\n");
     printf("CREATEFRAME\n");
+}
+
+void IfCond()
+{
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS ifelse%d\n",ifelsecount);
+}
+
+void IfElse()
+{
+    printf("LABEL ifelse%d\n",ifelsecount);
+}
+
+void IfEnd()
+{
+    ifelsecount++;
+}
+
+void LooStart()
+{
+    printf("LABEL while%d\n",dowhilecount);
+}
+
+void LoopCond()
+{
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS whileend%d\n",dowhilecount);
+
+}
+
+void LoopEnd()
+{
+    printf("JUMP while%d\n",dowhilecount);
+    printf("LABEL whileend%d\n",dowhilecount);
+    dowhilecount++;
 }
 
 void Declare_var(char* id)
@@ -45,9 +85,8 @@ void Declare_fun(char* id)
     }
 }
 
-void Declare_funend(char* retid)
+void Declare_funend()
 {
-    printf("PUSHS TF@%s\n",retid);
     printf("RETURN\n");
 }
 
@@ -83,8 +122,9 @@ void Operation(token* operation,token* op1,token* op2)
             printf("PUSHS TF@%s\n",op2pom->id);
         }
         printf("DIVS\n");
-        char pom[STRINGSIZE];
-        rand_str(pom,STRINGSIZE);
+        char pom[STRINGSIZE+tempvarcount];
+        rand_str(pom,STRINGSIZE+tempvarcount);
+        tempvarcount++;
         printf("DEFVAR TF@%s\n",pom);
         printf("POPS TF@%s\n",pom);
         printf("FLOAT2R2EINT %s %s\n",pom,pom);

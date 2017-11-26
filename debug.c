@@ -1,7 +1,11 @@
 #include "debug.h"
 
+int debugg=1;
+
 void PrintToken(token* tok)
 {
+    if (debugg==0)
+        return;
     if (tok==NULL)
     {
         return;

@@ -36,6 +36,7 @@ int main (int argc, char **argv) {
 int Parse()
 {
     GlobalST=sym_tab_init();
+    Program_begin();
     return Program();
 }
 
@@ -73,6 +74,7 @@ int Main()//Hlavni telo programu
     sym_tab_insert(GlobalST,pom);
     CurrentST=pom->localtable;
     currentfun="main";
+    Main_fun();
 
     DeleteEOL();
     token* tok=GetToken(soubor);
@@ -231,6 +233,7 @@ int FunDef()//Definice funkce
         declared=1;
         CurrentST=pom->localtable;
     }
+    Declare_fun(idfunkce);
 
     tok=GetToken(soubor);
     PrintToken(tok);
@@ -330,6 +333,7 @@ int FunDef()//Definice funkce
     {
         return 0;
     }
+    Declare_funend();
 
     return 1;
 }
@@ -565,6 +569,7 @@ int S()//Prikaz
 
         pom=create_sym_tab_elem_var(varid,typ);
         sym_tab_insert(CurrentST,pom);
+        Declare_var(pom->id);
 
         tok=GetToken(soubor);
         PrintToken(tok);
@@ -621,9 +626,12 @@ int S()//Prikaz
     }
     else if (tok->type==IF)//If else
     {
+
         int i=E();
         if (i==0)
             return 0;
+
+        IfCond();
 
         tok=GetToken(soubor);
         PrintToken(tok);
@@ -643,9 +651,13 @@ int S()//Prikaz
         if (i==0)
             return 0;
 
+        IfElse();
+
         i=Else();
         if (i==0)
             return 0;
+
+        IfEnd();
 
         tok=GetToken(soubor);
         PrintToken(tok);
@@ -677,6 +689,8 @@ int S()//Prikaz
             return 0;
         }
 
+        LooStart();
+
         int i=E();
         if (i==0)
             return 0;
@@ -691,6 +705,8 @@ int S()//Prikaz
         i=Stat();
         if (i==0)
             return 0;
+
+        LoopEnd();
 
         tok=GetToken(soubor);
         PrintToken(tok);
