@@ -152,7 +152,7 @@ void Operation(token* operation,token* op1,token* op2)
         printf("DIVS\n");
     }
 
-    else if (operation->type==PLUS)
+    else if (operation->type==PLUS)//pridat konkatenanci retezcu
     {
         if (op1pom==NULL)
         {

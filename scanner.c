@@ -133,7 +133,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						 }
 					else if (znak == '!') {
 						state = 10;
-						AddChar(buff, znak);
 					}
 
 					else if (znak == '$') {
@@ -449,13 +448,9 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					break;
 
 			case 9: //jednoradkovy komentar
-					printf("%c\n",znak );
 					if ((znak == '\n') || (znak == EOF)) {
 						ungetc (znak, soubor);
 						state = 0;
-					}
-					else if (znak == '\0') { //mozna s nim budou problemy
-
 					}
 					else {
 
@@ -464,7 +459,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 			case 10: //stringovy literal 1/2
 					 if (znak == '"'){
 					 	state = 11;
-					 	AddChar(buff, znak);
 					 	}
 					 else { printf("tohle neni retezec\n");}
 
@@ -472,7 +466,6 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 			case 11: //stringovy literal 2/2
 					 if (znak == '"')  {
-					 		AddChar(buff, znak);
 					 		tok->type = RETEZEC;
 							tok->string_hodnota = realloc(tok->string_hodnota, buff->lenght);
 							strcpy(tok->string_hodnota, buff->str);
