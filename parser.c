@@ -28,8 +28,7 @@ int main (int argc, char **argv) {
     }
     PrintToken(tok);
 */
-    int i=Parse();
-    printf("%d\n",i);
+    printf("%d\n",Parse());
 	fclose (soubor);
 	return 1;
 }
@@ -220,19 +219,17 @@ int FunDef()//Definice funkce
     char* idfunkce=tok->string_hodnota;
     currentfun=idfunkce;
     SymTab_Element* pom=sym_tab_find(GlobalST,idfunkce);
+    if (pom==NULL)
     {
-        if (pom==NULL)
-        {
-            declared=0;
-            pom=create_sym_tab_elem_fun(idfunkce,SymTab_DataType_Void);
-            sym_tab_insert(GlobalST,pom);
-            CurrentST=pom->localtable;
-        }
-        else
-        {
-            declared=1;
-            CurrentST=pom->localtable;
-        }
+        declared=0;
+        pom=create_sym_tab_elem_fun(idfunkce,SymTab_DataType_Void);
+        sym_tab_insert(GlobalST,pom);
+        CurrentST=pom->localtable;
+    }
+    else
+    {
+        declared=1;
+        CurrentST=pom->localtable;
     }
 
     tok=GetToken(soubor);
@@ -463,6 +460,7 @@ int Par()//Parametr funkce
     SymTab_Element* pom=create_sym_tab_elem_fun(idpar,typ);
     sym_tab_insert(CurrentST,pom);
     pom=sym_tab_find(GlobalST,currentfun);
+    InsertPar(pom->pararr,idpar);
     pom->paramcount++;
 
     return 1;
