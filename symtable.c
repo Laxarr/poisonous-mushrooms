@@ -123,6 +123,8 @@ SymTab_Element* create_sym_tab_elem_fun(char* id, SymTab_DataType data)
         new_elem_ptr->declared=0;
         new_elem_ptr->initialized=0;
         new_elem_ptr->paramcount=0;
+        new_elem_ptr->pararr=malloc(sizeof(pararray));
+        InitParArray(new_elem_ptr->pararr);
         new_elem_ptr->localtable=sym_tab_init();
         new_elem_ptr->left=NULL;
         new_elem_ptr->right=NULL;

@@ -9,6 +9,8 @@
 #include "debug.h"
 #include "symtable.h"
 #include "expr.h"
+#include "codegenerator.h"
+#include "string.h"
 
 int Parse();
 int Program();

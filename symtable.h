@@ -5,6 +5,7 @@
 
 #ifndef SYMTABLE
 #define SYMTABLE
+#include "string.h"
 
 typedef enum
 {
@@ -29,6 +30,7 @@ typedef struct SymTab_Element
     int declared;
     int initialized;
     int paramcount;
+    pararray* pararr;
     struct SymTab_Element *left;
     struct SymTab_Element *right;
     struct Sym_Tab* localtable;
