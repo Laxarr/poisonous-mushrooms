@@ -11,6 +11,7 @@
 #include "expr.h"
 #include "codegenerator.h"
 #include "string.h"
+#include "error.h"
 
 int Parse();
 int Program();

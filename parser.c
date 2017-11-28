@@ -30,7 +30,7 @@ int main (int argc, char **argv) {
 */
     printf("%d\n",Parse());
 	fclose (soubor);
-	return 1;
+	return 0;
 }
 
 int Parse()
@@ -302,16 +302,16 @@ int FunDef()//Definice funkce
         }
     }
 
-    i=Stat();
-    if (i==0)
-        return 0;
-
-    /*tok=GetToken(soubor);
+    tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type!=tEOL)
     {
         return 0;
-    }*/
+    }
+
+    i=Stat();
+    if (i==0)
+        return 0;
 
     tok=GetToken(soubor);
     PrintToken(tok);
@@ -610,6 +610,7 @@ int S()//Prikaz
         {
             return 0;
         }
+        Read(tok);
     }
     else if (tok->type==PRINT)//PRINT OUT
     {
@@ -689,7 +690,7 @@ int S()//Prikaz
             return 0;
         }
 
-        LooStart();
+        LoopStart();
 
         int i=E();
         if (i==0)
@@ -765,6 +766,8 @@ int Out()
     int i=E();
     if (i==0)
         return 0;
+
+    Write();
 
     token* tok=GetToken(soubor);
     PrintToken(tok);

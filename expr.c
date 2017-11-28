@@ -1,231 +1,184 @@
 #include "expr.h"
 
-typedef enum {
-    zadek,   // =
-// mozna vyuziju pro prirazeni veci, ktere jdou ulozit na zasobnik
- 
-} ENvycet;
-static const char table[Tsize][Tsize] = { //i, j
-            // VSTUP
-          // $   +   -   *   /   <   >  <>  <=  >=   =   ID INT DBL  (   )
-/* $   */ { ' ','<','<','<','<','<','<','<','<','<','<','<','<','<','<',' '}  
-/* +   */ { '>','>','>','<','<','>','>','>','>','>','>','<','<','<','<','>'}   
-/* -   */ { '>','>','>','<','<','>','>','>','>','>','>','<','<','<','<','>'}
-/* *   */ { '>','>','>','>','>','>','>','>','>','>','>','<','<','<','<','>'}
-/* /   */ { '>','>','>','>','>','>','>','>','>','>','>','<','<','<','<','>'}
-/* <   */ { '>','<','<','<','<','>','>','>','>','>','>','<','<','<','<','>'}
-/* >   */ { '>','<','<','<','<','>','>','>','>','>','>','<','<','<','<','>'}
-/* <>  */ { '>','<','<','<','<','>','>','>','>','>','>','<','<','<','<','>'}
-/* <=  */ { '>','<','<','<','<','>','>','>','>','>','>','<','<','<','<','>'}
-/* >=  */ { '>','<','<','<','<','>','>','>','>','>','>','<','<','<','<','>'}
-/* =   */ { '>','<','<','<','<','>','>','>','>','>','>','<','<','<','<','>'}
-/* ID  */ { '>','>','>','>','>','>','>','>','>','>','>',' ',' ',' ',' ','>'}
-/* INT */ { '>','>','>','>','>','>','>','>','>','>','>',' ',' ',' ',' ','>'}
-/* DBL */ { '>','>','>','>','>','>','>','>','>','>','>',' ',' ',' ',' ','>'}
-/* (   */ { ' ','<','<','<','<','<','<','<','<','<','<','<','<','<','<','='}
-/* )   */ { '>','>','>','<','<','>','>','>','>','>','>',' ','>','>','=','>'}
-};
-int NumberRow (char* c) { //nwm co mam vracet
-    int i;
+tStack* zasobnik;
 
-    if      (c == '$') j = 0;
-    else if (tok->type == PLUS) j = 1;
-    else if (tok->type == MINUS) j = 2;
-    else if (tok->type == NASOBENI) j = 3;
-    else if (tok->type == DELENI) j = 4;
-    else if (tok->type == MENSI) j = 5;
-    else if (tok->type == VETSI) j = 6;
-    else if (tok->type == MENSI_ROVNO) j = 7;
-    else if (tok->type == VETSI_ROVNO) j = 8;
-    else if (tok->type == ROVNO) j = 9;
-    else if (tok->type == ID) j = 10;
-    //nwm
-    else if (tok->type == DOLAR) j = 11;
-    else if (tok->type == DOLAR) j = 12;
-    //nwm
-    else if (tok->type == KULATA_ZAV_ZAC) j = 13;
-    else if (tok->type == KULATA_ZAV_KON) j = 14;
-
-    return j;
- }
-
-
-int NumberColumn (token* tok) { // vraci cislo sloupce, kde je vstup
-    int j;
-
-    if      (tok->type == DOLAR) j = 0;
-    else if (tok->type == PLUS) j = 1;
-    else if (tok->type == MINUS) j = 2;
-    else if (tok->type == NASOBENI) j = 3;
-    else if (tok->type == DELENI) j = 4;
-    else if (tok->type == MENSI) j = 5;
-    else if (tok->type == VETSI) j = 6;
-    else if (tok->type == MENSI_ROVNO) j = 7;
-    else if (tok->type == VETSI_ROVNO) j = 8;
-    else if (tok->type == ROVNO) j = 9;
-    else if (tok->type == ID) j = 10;
-    //nwm
-    else if (tok->type == DOLAR) j = 11;
-    else if (tok->type == DOLAR) j = 12;
-    //nwm
-    else if (tok->type == KULATA_ZAV_ZAC) j = 13;
-    else if (tok->type == KULATA_ZAV_KON) j = 14;
-
-    return j;
- }
-
-char TableSearch (int* i,int* j) { // najde v tabulce znak a vrati ho
-    char c = table [i][j];
-    return c;
-}
-
-int IsSymbol () { // kouka na stack jestli je na zasobniku symbol(terminal)
-
-
-}
-
-int Expr_Analysis() //nekde tady to budu muset cyklit
+int OperatorPriority(token* tok)
 {
-    stackInit(Tstack);
-    // vloz na zasobnik $
-    stackPush (Tstack,'$');
+    if (tok->type == NASOBENI) return 3;
+    else if (tok->type == DELENI) return 3;
+    else if (tok->type == CELO_CIS_DELENI) return 2;
+    else if (tok->type == PLUS) return 1;
+    else if (tok->type == MINUS) return 1;
+    else if (tok->type == NEROVNOST) return 0;
+    else if (tok->type == VETSI) return 0;
+    else if (tok->type == MENSI_ROVNO) return 0;
+    else if (tok->type == VETSI_ROVNO) return 0;
+    else if (tok->type == ROVNOST) return 0;
+    else if (tok->type == MENSI) return 0;
+    return -1;
+}
 
-     //nacti dalsi token
-    token* tok=GetToken(soubor);
+int ValidType(token* tok)
+{
+    if (tok->type == PLUS) return 4;
+    else if (tok->type == MINUS) return 4;
+    else if (tok->type == NASOBENI) return 4;
+    else if (tok->type == DELENI) return 4;
+    else if (tok->type == MENSI) return 4;
+    else if (tok->type == NEROVNOST) return 4;
+    else if (tok->type == VETSI) return 4;
+    else if (tok->type == MENSI_ROVNO) return 4;
+    else if (tok->type == VETSI_ROVNO) return 4;
+    else if (tok->type == ROVNOST) return 4;
+    else if (tok->type == ID) return 1;
+    else if (tok->type == NUMBER_INT) return 1;
+    else if (tok->type == NUMBER_DOUBLE) return 1;
+    else if (tok->type == KULATA_ZAV_ZAC) return 2;
+    else if (tok->type == KULATA_ZAV_KON) return 3;
+    else if (tok->type == RETEZEC) return 1;
+    else if (tok->type == CELO_CIS_DELENI) return 4;
+    else if (tok->type == tEOL) return 5;
+    else if (tok->type == tEOF) return 5;
+    else if (tok->type == THEN) return 5;
+    else return 0;
+}
 
-    
-
-   
-    // vrcholu zasobniku precti znak a prirad mu cislo odpovidajici radku tabulky
-    char top_char;
-    int i, j;
-
-    char table_char;
-
-    stackTop ( const Tstack,top_char);
-
-
-    i = NumberRow(top_char);
-    j = NumberColumn(token* tok);
-
-
-
-    // nacteny token a prirad mu cislo ze sloupce taulky
-
-   
-
-
-    //najdi s pomoci souradnic znamenko v tabulce < > =
-     table_char = TableSearch (i, j);
-
-    // krade pera
-
-    // podle toho se rozhodni
-
-    if (table_char == '=') {
-        stackPush (Tstack, top_char); // TADY budu vkladat asi neco jineho
-
+void untilLeftPar (int* index )
+{
+    token* pom=stackTop(zasobnik);
+    while (pom->type != KULATA_ZAV_ZAC)
+    {
+        stackPop(zasobnik);
+        postfixexp[*index]=pom;
+        *index=*index+1;
+        pom=stackTop(zasobnik);
     }
+    stackPop(zasobnik);
+}
 
-    else if (table_char == '<') {
-
-        if (je terminal posledni znak) {
-             stackPush (Tstack, table_char);
+void doOperation (token* tok,int* index )
+{
+    int done=0;
+    while (!done)
+    {
+        token* pom=stackTop(zasobnik);
+        if (stackEmpty(zasobnik))
+        {
+            stackPush(tok,zasobnik);
+            done++;
         }
-
-        else {
-            ENvycet tmp = StackPop (Tstack);
-            stackPush (Tstack, table_char);
-            stackPush (Tstack, tmp);
-        }         
-
+        else if (pom->type == KULATA_ZAV_ZAC)
+        {
+            stackPush(tok,zasobnik);
+            done++;
+        }
+        else if (OperatorPriority(tok)>OperatorPriority(pom))
+        {
+            stackPush(tok,zasobnik);
+            done++;
+        }
+        else
+        {
+            postfixexp[*index]=stackTop(zasobnik);
+            stackPop(zasobnik);
+            *index=*index+1;
+        }
     }
+}
 
-    else if (table_char == '>') {
-        // zde budou ty pravidla, moc jim nerozumim
-        // a asi to razeni symbolu
-
-    }
-
-    else {
-       printf("error pri zpracovani vyrazu\n");    
-    }
-
-    
-        // kdyz > 
-                  //  Najdi na zásobníku nevrchnější <
-                  //  Mezi < a vrcholem najdi pravou stranu nějakého pravidla
-                  //  Odstraň tuto část zásobníku včetně <
-                  //  Nahraď ji levou stranou pravidla
-                    //tady fakt nwm, jak  pracovat
-
-
-        // kdyz < za nejhornejsi symbol zasobniku (nemusi to byt vrchol) dej <
-
-        // kdyz =   dej  vstupni symbol na zasobnik
-
-        // kdyz ' ' tak hod error
-
-    // 
-
-
+int Expr_Analysis()
+{
 
     token* tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type==ID)//volani funkce
     {
-        tok=GetToken(soubor);
-        PrintToken(tok);
-        if (tok->type==KULATA_ZAV_ZAC)
+        if (sym_tab_find(GlobalST,tok->string_hodnota)!=NULL)
         {
             tok=GetToken(soubor);
             PrintToken(tok);
-            while(tok->type!=KULATA_ZAV_KON)
+            if (tok->type==KULATA_ZAV_ZAC)
             {
-                if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT || tok->type==ID))
-                {
-                return 0;
-                }
                 tok=GetToken(soubor);
                 PrintToken(tok);
-                if (tok->type==KULATA_ZAV_KON)
+                while(tok->type!=KULATA_ZAV_KON)
                 {
-                    break;
+                    if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT || tok->type==ID))
+                    {
+                    return 0;
+                    }
+                    tok=GetToken(soubor);
+                    PrintToken(tok);
+                    if (tok->type==KULATA_ZAV_KON)
+                    {
+                        break;
+                    }
+                    if (tok->type!=CARKA)
+                    {
+                    return 0;
+                    }
+                    tok=GetToken(soubor);
+                    PrintToken(tok);
                 }
-                if (tok->type!=CARKA)
-                {
-                return 0;
-                }
-                tok=GetToken(soubor);
-                PrintToken(tok);
-            }
 
-            if (tok->type!=KULATA_ZAV_KON)
-            {
-                return 0;
+                if (tok->type!=KULATA_ZAV_KON)
+                {
+                    return 0;
+                }
+                tok=GetToken(soubor);
+                PrintToken(tok);
+                if (tok->type!=tEOL)
+                {
+                    return 0;
+                }
             }
-            tok=GetToken(soubor);
-            PrintToken(tok);
-            if (tok->type!=tEOL)
-            {
-                return 0;
-            }
+        }
+    }
+
+    zasobnik = (tStack*) malloc(sizeof(tStack));
+    stackInit(zasobnik);
+    int index=0;
+
+    while (1)
+    {
+        int i = ValidType(tok);
+        if (i==1)
+        {
+            postfixexp[index]=tok;
+            index++;
+        }
+        else if (i==2)
+        {
+            stackPush(tok,zasobnik);
+        }
+        else if (i==3)
+        {
+            untilLeftPar(&index);
+        }
+        else if (i==4)
+        {
+            doOperation(tok,&index);
+        }
+        else if (i==5)
+        {
+            break;
         }
         else
         {
-          //tady muzes zacit psat
-
-
-
-
-
-
-
-
-
-
-
+            return 0;
         }
+        tok=GetToken(soubor);
+        PrintToken(tok);
     }
+
+    UngetToken(tok);
+
+    while (!stackEmpty(zasobnik))
+    {
+        postfixexp[index]=stackTop(zasobnik);
+        stackPop(zasobnik);
+        index++;
+    }
+    //generuj kod
     return 1;
 }

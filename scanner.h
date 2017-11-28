@@ -8,6 +8,7 @@
 
 #include "string.h"
 
+
 typedef enum {
         tEOF,
 		tEOL,

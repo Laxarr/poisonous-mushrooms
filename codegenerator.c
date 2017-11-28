@@ -8,6 +8,7 @@ int dowhilecount=0;
 void Program_begin()
 {
     printf(".IFJcode17\n");
+    printf("DEFVAR GF@pom\n");
     printf("JUMP main\n");
 }
 
@@ -33,7 +34,7 @@ void IfEnd()
     ifelsecount++;
 }
 
-void LooStart()
+void LoopStart()
 {
     printf("LABEL while%d\n",dowhilecount);
 }
@@ -42,7 +43,6 @@ void LoopCond()
 {
     printf("PUSHS bool@true\n");
     printf("JUMPIFNEQS whileend%d\n",dowhilecount);
-
 }
 
 void LoopEnd()
@@ -55,6 +55,23 @@ void LoopEnd()
 void Declare_var(char* id)
 {
     printf("DEFVAR TF@%s\n",id);
+}
+
+void Read(token* var)
+{
+    printf("? \n");
+    if (var->type==DOUBLE)
+        printf("READ TF@%s float\n",var->string_hodnota);
+    else if (var->type==INTEGER)
+        printf("READ TF@%s int\n",var->string_hodnota);
+    else if (var->type==STRING)
+        printf("READ TF@%s string\n",var->string_hodnota);
+}
+
+void Write()
+{
+    printf("POPS GF@pom\n");
+    printf("WRITE GF@pom\n");
 }
 
 void PushParam(token* tok)
@@ -88,6 +105,11 @@ void Declare_fun(char* id)
 void Declare_funend()
 {
     printf("RETURN\n");
+}
+
+void AssignVal(char* id)
+{
+    printf("POPS TF@%s",id);
 }
 
 void Operation(token* operation,token* op1,token* op2)

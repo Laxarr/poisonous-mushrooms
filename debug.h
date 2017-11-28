@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
 #ifndef DEBUG
 #define DEBUG
 
