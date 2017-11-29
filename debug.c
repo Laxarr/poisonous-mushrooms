@@ -1,6 +1,6 @@
 #include "debug.h"
 
-int debugg=1;
+int debugg=0;
 
 void PrintToken(token* tok)
 {

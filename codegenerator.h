@@ -16,6 +16,7 @@ void PushParam(token* tok);
 void Declare_fun(char* id);
 void Declare_funend();
 void IfCond();
+void Iftrueend();
 void IfElse();
 void IfEnd();
 void Operation(token* operation,token* op1,token* op2);

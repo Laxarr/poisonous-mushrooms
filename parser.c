@@ -28,7 +28,7 @@ int main (int argc, char **argv) {
     }
     PrintToken(tok);
 */
-    printf("%d\n",Parse());
+    Parse();
 	fclose (soubor);
 	return 0;
 }
@@ -233,7 +233,6 @@ int FunDef()//Definice funkce
         declared=1;
         CurrentST=pom->localtable;
     }
-    Declare_fun(idfunkce);
 
     tok=GetToken(soubor);
     PrintToken(tok);
@@ -252,6 +251,8 @@ int FunDef()//Definice funkce
     {
         return 0;
     }
+
+    Declare_fun(idfunkce);
 
     tok=GetToken(soubor);
     PrintToken(tok);
@@ -461,7 +462,7 @@ int Par()//Parametr funkce
             return 0;
         }
     }
-    SymTab_Element* pom=create_sym_tab_elem_fun(idpar,typ);
+    SymTab_Element* pom=create_sym_tab_elem_par(idpar,typ);
     sym_tab_insert(CurrentST,pom);
     pom=sym_tab_find(GlobalST,currentfun);
     InsertPar(pom->pararr,idpar);
@@ -576,7 +577,10 @@ int S()//Prikaz
         if (tok->type==ROVNOST)
         {
             currentvar=varid;
-            return E();
+            int i= E();
+            if (i==0)
+                return 0;
+            AssignVal(varid);
         }
         UngetToken(tok);
 
@@ -595,7 +599,13 @@ int S()//Prikaz
         {
             return 0;
         }
-        return E();
+        int i= E();
+        if (i==0)
+        {
+            return 0;
+        }
+        AssignVal(pom->id);
+        return 1;
     }
     else if (tok->type==INPUT)//INPUT ID
     {
@@ -652,6 +662,7 @@ int S()//Prikaz
         if (i==0)
             return 0;
 
+        Iftrueend();
         IfElse();
 
         i=Else();
@@ -696,6 +707,8 @@ int S()//Prikaz
         if (i==0)
             return 0;
 
+        LoopCond();
+
         tok=GetToken(soubor);
         PrintToken(tok);
         if (tok->type!=tEOL)
@@ -736,12 +749,13 @@ int Else()
 {
     token* tok=GetToken(soubor);
     PrintToken(tok);
+    /*
     if (tok->type==END)
     {
         UngetToken(tok);
         return 1;
     }
-
+*/
     if (tok->type!=ELSE)
     {
         return 0;
@@ -773,6 +787,12 @@ int Out()
     PrintToken(tok);
     if (tok->type==STREDNIK)
     {
+        tok=GetToken(soubor);
+        if (tok->type==tEOL)
+        {
+            return 1;
+        }
+        UngetToken(tok);
         return Out();
     }
     else if (tok->type!=tEOL)

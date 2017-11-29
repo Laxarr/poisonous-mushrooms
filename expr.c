@@ -40,6 +40,7 @@ int ValidType(token* tok)
     else if (tok->type == tEOL) return 5;
     else if (tok->type == tEOF) return 5;
     else if (tok->type == THEN) return 5;
+    else if (tok->type == STREDNIK) return 5;
     else return 0;
 }
 
@@ -95,6 +96,7 @@ int Expr_Analysis()
     {
         if (sym_tab_find(GlobalST,tok->string_hodnota)!=NULL)
         {
+            char* funid=tok->string_hodnota;
             tok=GetToken(soubor);
             PrintToken(tok);
             if (tok->type==KULATA_ZAV_ZAC)
@@ -107,6 +109,9 @@ int Expr_Analysis()
                     {
                     return 0;
                     }
+
+                    PushParam(tok);
+
                     tok=GetToken(soubor);
                     PrintToken(tok);
                     if (tok->type==KULATA_ZAV_KON)
@@ -131,6 +136,7 @@ int Expr_Analysis()
                 {
                     return 0;
                 }
+                Call_fun(funid);
             }
         }
     }
@@ -179,6 +185,36 @@ int Expr_Analysis()
         stackPop(zasobnik);
         index++;
     }
-    //generuj kod
+    if (index==1)
+    {
+        PushParam(postfixexp[0]);
+        return 1;
+    }
+    int i=0;
+    for (;i<index;i++)
+    {
+        int typ=ValidType(postfixexp[i]);
+        if (typ==1)
+        {
+            stackPush(postfixexp[i],zasobnik);
+        }
+        else if (typ==4)
+        {
+            token* op=postfixexp[i];
+            token* op1=stackTop(zasobnik);
+            stackPop(zasobnik);
+            token* op2=stackTop(zasobnik);
+            stackPop(zasobnik);
+            Operation(op,op1,op2);
+            stackPush(NULL,zasobnik);
+        }
+
+    }
+    stackPop(zasobnik);
+    /*if (!stackEmpty(zasobnik))
+    {
+        PushParam(postfixexp[i]);
+        stackPop(zasobnik);
+    }*/
     return 1;
 }
