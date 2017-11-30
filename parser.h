@@ -14,6 +14,7 @@
 #include "error.h"
 
 int Parse();
+void BuildInFunctions();
 int Program();
 int Main();
 int FunDec();

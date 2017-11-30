@@ -1,8 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
 #ifndef ERRORHANDLER
 #define ERRORHANDLER
-
-#include "scanner.h"
-#include "parser.h"
 
 void Error(int errcode);
 

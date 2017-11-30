@@ -1,24 +1,7 @@
 #include "parser.h"
 
-int main (int argc, char **argv) {
-	//argument bude název souboru
-	//podminky kdyz bude spatnej pocet argumentu
-	// mozna se muze brat vice argumentu, nebo jeste nejaky, NUTNO DODELAT
-	//EXIT SE MUSI NECIM NAHRADIT
-	if ((argc != 2) || (strcmp(argv[1],"") == 0))
-    {
-		fprintf(stderr, "nespravne argumenty\n");
-		exit(2);
-	}
-
-	//otevreni souboru
-
-	char *nazev = argv[1];
-	soubor = fopen(nazev,"rt");
-		if (soubor == NULL) {
-		    fprintf(stderr, "soubor nelze otevrit!\n");
-		    exit(1);
-		}
+int main ()
+{
 /*
     token* tok = GetToken(soubor);
     while (tok->type!=tEOF)
@@ -29,13 +12,57 @@ int main (int argc, char **argv) {
     PrintToken(tok);
 */
     Parse();
-	fclose (soubor);
 	return 0;
+}
+
+void BuildInFunctions()
+{
+    SymTab_Element* pom=create_sym_tab_elem_fun("Length",SymTab_DataType_Integer);
+    pom->paramcount=1;
+    InsertPar(pom->pararr,"s");
+    sym_tab_insert(GlobalST,pom);
+    CurrentST=pom->localtable;
+    pom=create_sym_tab_elem_par("s",SymTab_DataType_String);
+    sym_tab_insert(CurrentST,pom);
+
+    pom=create_sym_tab_elem_fun("SubStr",SymTab_DataType_String);
+    pom->paramcount=3;
+    InsertPar(pom->pararr,"s");
+    InsertPar(pom->pararr,"i");
+    InsertPar(pom->pararr,"n");
+    sym_tab_insert(GlobalST,pom);
+    CurrentST=pom->localtable;
+    pom=create_sym_tab_elem_par("s",SymTab_DataType_String);
+    sym_tab_insert(CurrentST,pom);
+    pom=create_sym_tab_elem_par("i",SymTab_DataType_Integer);
+    sym_tab_insert(CurrentST,pom);
+    pom=create_sym_tab_elem_par("n",SymTab_DataType_Integer);
+    sym_tab_insert(CurrentST,pom);
+
+    pom=create_sym_tab_elem_fun("Asc",SymTab_DataType_Integer);
+    pom->paramcount=2;
+    InsertPar(pom->pararr,"s");
+    InsertPar(pom->pararr,"i");
+    sym_tab_insert(GlobalST,pom);
+    CurrentST=pom->localtable;
+    pom=create_sym_tab_elem_par("s",SymTab_DataType_String);
+    sym_tab_insert(CurrentST,pom);
+    pom=create_sym_tab_elem_par("i",SymTab_DataType_Integer);
+    sym_tab_insert(CurrentST,pom);
+
+    pom=create_sym_tab_elem_fun("Chr",SymTab_DataType_String);
+    pom->paramcount=1;
+    InsertPar(pom->pararr,"i");
+    sym_tab_insert(GlobalST,pom);
+    CurrentST=pom->localtable;
+    pom=create_sym_tab_elem_par("i",SymTab_DataType_Integer);
+    sym_tab_insert(CurrentST,pom);
 }
 
 int Parse()
 {
     GlobalST=sym_tab_init();
+    BuildInFunctions();
     Program_begin();
     return Program();
 }
@@ -54,8 +81,17 @@ void DeleteEOL()//Smazani znaku noveho radku
 
 int Program()//Program
 {
-    DeleteEOL();
     token* tok=GetToken(soubor);
+    PrintToken(tok);
+    if (tok->type==tEOL)
+    {
+        UngetToken(tok);
+        DeleteEOL();
+    }
+    else
+        UngetToken(tok);
+
+    tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type==tEOF)
     {
@@ -81,6 +117,7 @@ int Main()//Hlavni telo programu
     PrintToken(tok);
     if (tok->type!=SCOPE)
     {
+        Error(2);
         return 0;
     }
 
@@ -92,6 +129,7 @@ int Main()//Hlavni telo programu
     PrintToken(tok);
     if (tok->type!=END)
     {
+        Error(2);
         return 0;
     }
 
@@ -99,12 +137,14 @@ int Main()//Hlavni telo programu
     PrintToken(tok);
     if (tok->type!=SCOPE)
     {
+        Error(2);
         return 0;
     }
     tok=GetToken(soubor);
     PrintToken(tok);
     if (tok->type!=tEOL)
     {
+        Error(2);
         return 0;
     }
     return 1;
@@ -117,6 +157,7 @@ int FunDec()//Deklarace funkce
     PrintToken(tok);
     if (tok->type!=DECLARE)
     {
+        Error(2);
         return 0;
     }
 
@@ -124,6 +165,7 @@ int FunDec()//Deklarace funkce
     PrintToken(tok);
     if (tok->type!=FUNCTION)
     {
+        Error(2);
         return 0;
     }
 
@@ -131,12 +173,14 @@ int FunDec()//Deklarace funkce
     PrintToken(tok);
     if (tok->type!=ID)
     {
+        Error(2);
         return 0;
     }
 
     char* idfunkce=tok->string_hodnota;
     if (sym_tab_find(GlobalST,idfunkce)!=NULL)
     {
+        Error(3);
         return 0;
     }
     declared=0;
@@ -149,6 +193,7 @@ int FunDec()//Deklarace funkce
     PrintToken(tok);
     if (tok->type!=KULATA_ZAV_ZAC)
     {
+        Error(2);
         return 0;
     }
 
@@ -160,6 +205,7 @@ int FunDec()//Deklarace funkce
     PrintToken(tok);
     if (tok->type!=KULATA_ZAV_KON)
     {
+        Error(2);
         return 0;
     }
 
@@ -167,6 +213,7 @@ int FunDec()//Deklarace funkce
     PrintToken(tok);
     if (tok->type!=AS)
     {
+        Error(2);
         return 0;
     }
 
@@ -174,6 +221,7 @@ int FunDec()//Deklarace funkce
     PrintToken(tok);
     if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
     {
+        Error(2);
         return 0;
     }
 
@@ -195,6 +243,7 @@ int FunDec()//Deklarace funkce
     PrintToken(tok);
     if (tok->type!=tEOL)
     {
+        Error(2);
         return 0;
     }
 
@@ -208,6 +257,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (tok->type!=FUNCTION)
     {
+        Error(2);
         return 0;
     }
 
@@ -215,6 +265,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (tok->type!=ID)
     {
+        Error(2);
         return 0;
     }
 
@@ -238,6 +289,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (tok->type!=KULATA_ZAV_ZAC)
     {
+        Error(2);
         return 0;
     }
 
@@ -249,6 +301,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (tok->type!=KULATA_ZAV_KON)
     {
+        Error(2);
         return 0;
     }
 
@@ -258,6 +311,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (tok->type!=AS)
     {
+        Error(2);
         return 0;
     }
 
@@ -265,6 +319,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
     {
+        Error(2);
         return 0;
     }
 
@@ -289,17 +344,26 @@ int FunDef()//Definice funkce
         if (tok->type==STRING)
         {
             if (pom->data_type!=SymTab_DataType_String)
+            {
+                Error(3);
                 return 0;
+            }
         }
         else if (tok->type==DOUBLE)
         {
             if (pom->data_type!=SymTab_DataType_Double)
+            {
+                Error(3);
                 return 0;
+            }
         }
         else if (tok->type==INTEGER)
         {
             if (pom->data_type!=SymTab_DataType_Integer)
-            return 0;
+            {
+                Error(3);
+                return 0;
+            }
         }
     }
 
@@ -307,6 +371,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (tok->type!=tEOL)
     {
+        Error(2);
         return 0;
     }
 
@@ -318,6 +383,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (tok->type!=END)
     {
+        Error(2);
         return 0;
     }
 
@@ -325,6 +391,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (tok->type!=FUNCTION)
     {
+        Error(2);
         return 0;
     }
 
@@ -332,6 +399,7 @@ int FunDef()//Definice funkce
     PrintToken(tok);
     if (tok->type!=tEOL)
     {
+        Error(2);
         return 0;
     }
     Declare_funend();
@@ -416,6 +484,7 @@ int Par()//Parametr funkce
     PrintToken(tok);
     if (tok->type!=ID)
     {
+        Error(2);
         return 0;
     }
 
@@ -424,6 +493,7 @@ int Par()//Parametr funkce
     {
         if (sym_tab_find(CurrentST,idpar)==NULL)
         {
+            Error(3);
             return 0;
         }
     }
@@ -431,6 +501,7 @@ int Par()//Parametr funkce
     PrintToken(tok);
     if (tok->type!=AS)
     {
+        Error(2);
         return 0;
     }
 
@@ -438,6 +509,7 @@ int Par()//Parametr funkce
     PrintToken(tok);
     if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
     {
+        Error(2);
         return 0;
     }
 
@@ -459,14 +531,18 @@ int Par()//Parametr funkce
         SymTab_Element* pom=sym_tab_find(CurrentST,idpar);
         if (pom->data_type!=typ)
         {
+            Error(3);
             return 0;
         }
     }
-    SymTab_Element* pom=create_sym_tab_elem_par(idpar,typ);
-    sym_tab_insert(CurrentST,pom);
-    pom=sym_tab_find(GlobalST,currentfun);
-    InsertPar(pom->pararr,idpar);
-    pom->paramcount++;
+    else
+    {
+        SymTab_Element* pom=create_sym_tab_elem_par(idpar,typ);
+        sym_tab_insert(CurrentST,pom);
+        pom=sym_tab_find(GlobalST,currentfun);
+        InsertPar(pom->pararr,idpar);
+        pom->paramcount++;
+    }
 
     return 1;
 }
@@ -482,6 +558,7 @@ int ParNext()//Dalsi parametr funkce
     }
     if (tok->type!=CARKA)
     {
+        Error(2);
         return 0;
     }
 
@@ -516,6 +593,8 @@ int Stat()//Blok prikazu
         UngetToken(tok);
         return 1;
     }
+
+    UngetToken(tok);
     return Stat();
 }
 
@@ -530,6 +609,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=ID)
         {
+            Error(2);
             return 0;
         }
 
@@ -537,6 +617,7 @@ int S()//Prikaz
         SymTab_Element* pom=sym_tab_find(CurrentST,varid);
         if (pom!=NULL)
         {
+            Error(3);
             return 0;
         }
 
@@ -544,6 +625,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=AS)
         {
+            Error(2);
             return 0;
         }
 
@@ -551,6 +633,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (!(tok->type==STRING || tok->type==DOUBLE || tok->type==INTEGER))
         {
+            Error(2);
             return 0;
         }
 
@@ -577,12 +660,13 @@ int S()//Prikaz
         if (tok->type==ROVNOST)
         {
             currentvar=varid;
-            int i= E();
+            int i = E();
             if (i==0)
                 return 0;
             AssignVal(varid);
         }
-        UngetToken(tok);
+        else
+            UngetToken(tok);
 
         return 1;
     }
@@ -591,12 +675,14 @@ int S()//Prikaz
         SymTab_Element* pom=sym_tab_find(CurrentST,tok->string_hodnota);
         if (pom==NULL)
         {
+            Error(3);
             return 0;
         }
         tok=GetToken(soubor);
         PrintToken(tok);
         if (tok->type!=ROVNOST)
         {
+            Error(2);
             return 0;
         }
         int i= E();
@@ -613,14 +699,18 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=ID)
         {
+            Error(2);
             return 0;
         }
         SymTab_Element* pom=sym_tab_find(CurrentST,tok->string_hodnota);
         if (pom==NULL)
         {
+            Error(3);
             return 0;
         }
         Read(tok);
+        tok=GetToken(soubor);
+        PrintToken(tok);
     }
     else if (tok->type==PRINT)//PRINT OUT
     {
@@ -631,6 +721,7 @@ int S()//Prikaz
         int i=strcmp(currentfun,"main");
         if (i==0)
         {
+            Error(2);
             return 0;
         }
         return E();
@@ -648,6 +739,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=THEN)
         {
+            Error(2);
             return 0;
         }
 
@@ -655,6 +747,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=tEOL)
         {
+            Error(2);
             return 0;
         }
 
@@ -675,6 +768,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=END)
         {
+            Error(2);
             return 0;
         }
 
@@ -682,6 +776,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=IF)
         {
+            Error(2);
             return 0;
         }
 
@@ -689,6 +784,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=tEOL)
         {
+            Error(2);
             return 0;
         }
     }
@@ -698,6 +794,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=WHILE)
         {
+            Error(2);
             return 0;
         }
 
@@ -713,6 +810,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=tEOL)
         {
+            Error(2);
             return 0;
         }
 
@@ -726,6 +824,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=LOOP)
         {
+            Error(2);
             return 0;
         }
 
@@ -733,6 +832,7 @@ int S()//Prikaz
         PrintToken(tok);
         if (tok->type!=tEOL)
         {
+            Error(2);
             return 0;
         }
     }
@@ -758,6 +858,7 @@ int Else()
 */
     if (tok->type!=ELSE)
     {
+        Error(2);
         return 0;
     }
 
@@ -765,6 +866,7 @@ int Else()
     PrintToken(tok);
     if (tok->type!=tEOL)
     {
+        Error(2);
         return 0;
     }
 
@@ -781,24 +883,23 @@ int Out()
     if (i==0)
         return 0;
 
-    Write();
-
     token* tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==STREDNIK)
+    if (tok->type!=STREDNIK)
     {
-        tok=GetToken(soubor);
-        if (tok->type==tEOL)
-        {
-            return 1;
-        }
-        UngetToken(tok);
-        return Out();
-    }
-    else if (tok->type!=tEOL)
-    {
+        Error(2);
         return 0;
     }
-    UngetToken(tok);
+    Write();
+
+    tok=GetToken(soubor);
+    PrintToken(tok);
+
+    if (tok->type==tEOL)
+    {
+        return 1;
+    }
+    else
+       return Out();
     return 1;
 }

@@ -27,6 +27,4 @@ char *GetStringBuffer(buffer *buff);
 
 int InitParArray(pararray* p);
 int InsertPar(pararray* p,char* id);
-
-void rand_str(char*dest, int length);
 #endif

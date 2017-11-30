@@ -150,17 +150,9 @@ void PrintToken(token* tok)
     {
         printf("; ");
     }
-    else if (tok->type==LENGTH)
-    {
-        printf("LENGTH ");
-    }
     else if (tok->type==DOUBLE)
     {
         printf("DOUBLE ");
-    }
-    else if (tok->type==CHR)
-    {
-        printf("CHR ");
     }
     else if (tok->type==LOOP)
     {
@@ -169,10 +161,6 @@ void PrintToken(token* tok)
     else if (tok->type==STRING)
     {
         printf("STRING ");
-    }
-    else if (tok->type==SUBSTR)
-    {
-        printf("SUBSTR ");
     }
     else if (tok->type==CARKA)
     {

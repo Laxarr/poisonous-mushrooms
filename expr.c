@@ -89,11 +89,15 @@ void doOperation (token* tok,int* index )
 
 int Expr_Analysis()
 {
-
     token* tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==ID)//volani funkce
+    if (tok->type==ID || tok->type==LENGTH || tok->type==SUBSTR || tok->type==ASC || tok->type==CHR)//volani funkce
     {
+        if (tok->type==LENGTH) tok->string_hodnota="Length";
+        if (tok->type==SUBSTR) tok->string_hodnota="SubStr";
+        if (tok->type==ASC) tok->string_hodnota="Asc";
+        if (tok->type==CHR) tok->string_hodnota="Chr";
+
         if (sym_tab_find(GlobalST,tok->string_hodnota)!=NULL)
         {
             char* funid=tok->string_hodnota;
@@ -136,7 +140,27 @@ int Expr_Analysis()
                 {
                     return 0;
                 }
-                Call_fun(funid);
+
+                if (strcmp(funid,"Length")==0)
+                {
+                    Length();
+                }
+                else if (strcmp(funid,"SubStr")==0)
+                {
+                    SubStr();
+                }
+                else if (strcmp(funid,"Asc")==0)
+                {
+                    Asc();
+                }
+                else if (strcmp(funid,"Chr")==0)
+                {
+                    Chr();
+                }
+                else
+                {
+                    Call_fun(funid);
+                }
             }
         }
     }
@@ -201,9 +225,9 @@ int Expr_Analysis()
         else if (typ==4)
         {
             token* op=postfixexp[i];
-            token* op1=stackTop(zasobnik);
-            stackPop(zasobnik);
             token* op2=stackTop(zasobnik);
+            stackPop(zasobnik);
+            token* op1=stackTop(zasobnik);
             stackPop(zasobnik);
             Operation(op,op1,op2);
             stackPush(NULL,zasobnik);
@@ -211,10 +235,5 @@ int Expr_Analysis()
 
     }
     stackPop(zasobnik);
-    /*if (!stackEmpty(zasobnik))
-    {
-        PushParam(postfixexp[i]);
-        stackPop(zasobnik);
-    }*/
     return 1;
 }
