@@ -48,6 +48,9 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 	int ne_zac_nula = 0;
 	int pocitadlo_nul = 0;
 	int zacatek_bezNuly = 0;
+	int bylo_E = 0;
+	int nenula_za_teckou = 0;
+	int nenula_za_E = 0;
 
     int state = 0; //Konecny automat
 
@@ -113,7 +116,10 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						 }
 
 					else if (znak == '@') {
-						state = 0;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
 					else if (znak == '#') {
@@ -124,8 +130,11 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						state = 0;
 						 }
 
-					else if (znak == 92) {  //CHYBI CELOCISELNE DELENI
-						state = 0;
+					else if (znak == 92) {	//jsem zpetne lomitko "\"
+ 						tok->type = CELO_CIS_DELENI;
+ 						FreeBuffer(buff);
+ 						free(buff);
+                        return tok;	
 						 }
 
 					else if (znak == '\n') {
@@ -133,36 +142,49 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						 }
 					else if (znak == '!') {
 						state = 10;
-						AddChar(buff, znak);
 					}
 
 					else if (znak == '$') {
-						state = 0;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
 					else if (znak == '^') {
-						AddChar(buff, znak);
-						tok->type = MOCNICI_STRIZKA;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
 					}
 
 					else if (znak == '`') {
-						state = 0;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 					else if (znak == '~') {
-						state = 0;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 					else if (znak == '&') {
-						state = 0;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 					else if (znak == '_') {
 						state = 6;
 						AddChar(buff, znak); }
 
 					else if (znak == '|') {
-						state = 0;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
 					else if (znak == '.') {
@@ -199,15 +221,24 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 
 					else if (znak == ':') {
-						state = 0;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
 					else if (znak == '"') {
-						state = 0;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
 					else if (znak == '%') {
-						state = 0;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 					}
 
 					else if (znak == 39) {   //radkovy komentar
@@ -220,27 +251,27 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 
 					else if (znak == '{') {
-						tok->type = SLOZENA_ZAC;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
 					}
 					else if (znak == '}') {
-						tok->type = SLOZENA_KON;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
 					}
 
 					else if (znak == '[') {
-						tok->type =HRANATA_ZAC;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
 					}
 
 					else if (znak == ']') {
-						tok->type = HRANATA_KON;
+						fprintf(stderr,"error, zadan nepovoleny znak\n");
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
@@ -278,16 +309,26 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 
 					else if ((znak == '.') && (na_konci_je_cislice != 0)) {	//je tam tecka -> je to des. cislo; musi pred nim byt cislice
-						state = 2;						//bude to deset. cislo
+						state = 2;		
+						if ((zacatek_bezNuly == 0) && (pocitadlo_nul == 1) && (ne_zac_nula == 0)) {
+							AddChar(buff, 48);
+						}
+
+
+						zacatek_bezNuly = 0;								//bude to deset. cislo
 						na_konci_je_cislice = 0;		// pokud ted bude konec nejedna se o spravne zapsane cislo
+						pocitadlo_nul = 0;
 						AddChar(buff, znak);			//ulozeni do bufferu
 					}
 
 					else if (((znak == 'e') || (znak == 'E')) && (na_konci_je_cislice != 0)) {  // je to E nebo e ; musi pred nim byt cislice
 						state = 2;								// bude to deset. cislo
-						if (pocitadlo_nul == 1) {
-							AddChar(buff, 0);
+						if ((zacatek_bezNuly == 0) && (pocitadlo_nul == 1) && (ne_zac_nula == 0)) {
+							AddChar(buff, 48);
 						}
+						pocitadlo_nul = 0;
+						bylo_E = 1;
+
 						pouze_jedno_e += 1;						// zajisti pouze jedno e
 						na_konci_je_cislice = 0;				// pokud ted bude konec nejedna se o spravne zapsane cislo
 						AddChar(buff, znak);					// ulozeni do bufferu
@@ -298,16 +339,17 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 						if ((zacatek_bezNuly == 0) && (pocitadlo_nul == 1) && (ne_zac_nula == 0)) {
 							AddChar(buff, 48);
 						}
+
 						tok->type = NUMBER_INT;
 						tok->int_hodnota = atoi(GetStringBuffer(buff));
 						FreeBuffer(buff);
 						free(buff);
-					return tok;
+						return tok;
 					}
 
 
 					else {
-						printf("error2\n");
+						fprintf(stderr,"error, chyba pri zpracovani celych cisel\n");
 						return tok;
 						//zbudou nepovolene znaky hod error
 					}
@@ -316,11 +358,48 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 			case 2: //DESETINNE CISLO
 					if (isdigit(znak)) {				//je to cislice
-						na_konci_je_cislice = 1;		//pokud ted bude konec je cislo v poradku
-						AddChar(buff, znak);			//ulozeni do bufferu
+						if ((znak != '0') && (bylo_E == 0)) {
+					
+							nenula_za_teckou = 1;
+							if (pocitadlo_nul != 0) {
+								for (pocitadlo_nul; pocitadlo_nul != 0; pocitadlo_nul--)	{
+									AddChar(buff, 48); //pridavam nulu
+								}
+							}
+							na_konci_je_cislice = 1;		//pokud ted bude konec je cislo v poradku
+							AddChar(buff, znak);			//ulozeni do bufferu
+						}
+						else if ((znak == '0') && (bylo_E == 0)) {
+							na_konci_je_cislice = 1;		//pokud ted bude konec je cislo v poradku
+							pocitadlo_nul += 1;
+						}
+						else if (((znak != '0') || (zacatek_bezNuly == 1)) && (bylo_E == 1)) {
+
+							nenula_za_E = 1;
+							na_konci_je_cislice = 1;		//pokud ted bude konec je cislo v poradku
+							if ((pocitadlo_nul != 0) && (zacatek_bezNuly == 1)) {
+
+								for (pocitadlo_nul; pocitadlo_nul != 0; pocitadlo_nul--)	{
+									AddChar(buff, 48); //pridavam nulu
+								}
+							}
+							else {
+								pocitadlo_nul = 0;
+							}
+							zacatek_bezNuly = 1;
+							AddChar(buff, znak);			//ulozeni do bufferu
+						}
+						else if ((znak == '0') && (bylo_E == 1) && (zacatek_bezNuly == 0)) {
+							nenula_za_E = 0;
+							na_konci_je_cislice = 1;
+							pocitadlo_nul += 1; 
+						}
+									//ulozeni do bufferu
 					}
 
 					else if (((znak == 'e') || (znak == 'E')) && (pouze_jedno_e == 0)) {
+						pocitadlo_nul = 0;
+						bylo_E = 1;
 						pouze_jedno_e += 1;				// v dc bude pouze jedno 'e', pripadne 'E'	viz horejsi podminka
 						na_konci_je_cislice = 0;		// pokud ted bude konec nejedna se o spravne zapsane cislo
 						AddChar(buff, znak);			// ulozeni do bufferu
@@ -333,6 +412,12 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 
 					else if ((na_konci_je_cislice == 1) && (AllowedNextChar(znak) == 0)) {
+					 if (nenula_za_teckou == 0) {
+							AddChar(buff, 48);
+						}
+						if (nenula_za_E == 0) {
+							AddChar(buff, 48);
+						}
 
 					ungetc(znak, soubor);
 					tok->type = NUMBER_DOUBLE;
@@ -345,7 +430,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 
 					else{							//neco je spatne
 						// nejaky error
-						printf("error\n");
+						fprintf(stderr,"error, chyba pri zpracovani desetinych cisel\n");
 						return tok;
 					}
 					break;
@@ -439,23 +524,20 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					}
 					break;
 			case 7:
-					printf("state 2\n");
+					fprintf(stderr,"error, chyba konecneho automatu\n");
 					state = 0;
 					break;
 			case 8:
 
-
+					fprintf(stderr,"error, chyba konecneho automatu\n");
+					state = 0;
 
 					break;
 
 			case 9: //jednoradkovy komentar
-					printf("%c\n",znak );
 					if ((znak == '\n') || (znak == EOF)) {
 						ungetc (znak, soubor);
 						state = 0;
-					}
-					else if (znak == '\0') { //mozna s nim budou problemy
-
 					}
 					else {
 
@@ -464,15 +546,13 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 			case 10: //stringovy literal 1/2
 					 if (znak == '"'){
 					 	state = 11;
-					 	AddChar(buff, znak);
 					 	}
-					 else { printf("tohle neni retezec\n");}
-
+					 else { fprintf(stderr,"error, chyba retezcoveho literalu\n");
+						}
 					 break;
 
 			case 11: //stringovy literal 2/2
 					 if (znak == '"')  {
-					 		AddChar(buff, znak);
 					 		tok->type = RETEZEC;
 							tok->string_hodnota = realloc(tok->string_hodnota, buff->lenght);
 							strcpy(tok->string_hodnota, buff->str);
@@ -483,13 +563,9 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 					 	}
 
 					 else if (znak == '#') {
-					 		printf("tohle neni retezec\n");
+					 		fprintf(stderr,"error, chyba retezcoveho literalu\n");
 					 		 return tok; }
-					 else if (znak == 92) {  //jsem zpetne lomitko "\"
- 						tok->type = CELO_CIS_DELENI;
- 						FreeBuffer(buff);
- 						free(buff);
-                        return tok;	}
+					
 					 else {
 					 		AddChar(buff, znak);
 					 }
@@ -519,7 +595,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 								state = 0; }
 
 					else {
-						printf("erroeeer\n");
+						fprintf(stderr,"error, chyba blokoveho komentare\n");
 						return tok;
 					}
 					break;
