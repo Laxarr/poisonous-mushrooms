@@ -1,3 +1,12 @@
+/********* codegenerator.h *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Martin Gajdosik, xgajdo21
+ * Summary: Gererator kodu.
+ *
+ */
+#include <string.h>
+
 #ifndef CODEGENERATOR
 #define CODEGENERATOR
 
@@ -14,6 +23,7 @@ void AssignVal(char* id);
 void Call_fun(char* id);
 void PushParam(token* tok);
 void Declare_fun(char* id);
+void PushRetVal(token* tok);
 void Declare_funend();
 void IfCond();
 void Iftrueend();
@@ -30,5 +40,6 @@ void Length();
 int dowhilecount;
 int ifelsecount;
 int tempvarcount;
+int writeout;
 #endif
 

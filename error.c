@@ -1,3 +1,10 @@
+/********* error.c *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Ondrej Brekl, xbrekl00
+ * Summary: Zpracovani chybovych stavu.
+ *
+ */
 #include "error.h"
 
 void Error(int errcode)

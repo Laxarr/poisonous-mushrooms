@@ -1,3 +1,10 @@
+/********* string.h *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Martin Gajdosik, xgajdo21
+ * Summary: Operace s retezci.
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

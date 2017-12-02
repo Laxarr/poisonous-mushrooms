@@ -1,3 +1,10 @@
+/********* parser.h *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Martin Gajdosik, xgajdo21
+ * Summary: Parser.
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>

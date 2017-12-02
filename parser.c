@@ -1,3 +1,10 @@
+/********* parser.c *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Martin Gajdosik, xgajdo21
+ * Summary: Parser.
+ *
+ */
 #include "parser.h"
 
 int main ()
@@ -140,12 +147,12 @@ int Main()//Hlavni telo programu
         Error(2);
         return 0;
     }
+    DeleteEOL();
     tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type!=tEOL)
+    if (tok->type!=tEOF)
     {
-        Error(2);
-        return 0;
+        Error(1);
     }
     return 1;
 }
@@ -612,7 +619,11 @@ int S()//Prikaz
             Error(2);
             return 0;
         }
-
+        if (sym_tab_find(GlobalST,tok->string_hodnota)!=NULL)
+        {
+            Error(3);
+            return 0;
+        }
         char* varid=tok->string_hodnota;
         SymTab_Element* pom=sym_tab_find(CurrentST,varid);
         if (pom!=NULL)
@@ -879,6 +890,7 @@ int Else()
 
 int Out()
 {
+    writeout=1;
     int i=E();
     if (i==0)
         return 0;
@@ -900,6 +912,9 @@ int Out()
         return 1;
     }
     else
-       return Out();
+    {
+        UngetToken(tok);
+        return Out();
+    }
     return 1;
 }

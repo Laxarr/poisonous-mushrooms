@@ -1,3 +1,10 @@
+/********* expr.c *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Ondrej Brekl, xbrekl00
+ * Summary: Precedencni analyza.
+ *
+ */
 #include "expr.h"
 
 tStack* zasobnik;
@@ -87,6 +94,24 @@ void doOperation (token* tok,int* index )
     }
 }
 
+int SameType(SymTab_Element* par,token* tok,SymTab_Element* fun)
+{
+    if (tok->type==RETEZEC && par->data_type==SymTab_DataType_String)
+        return 1;
+    if (tok->type==NUMBER_DOUBLE && par->data_type==SymTab_DataType_Double)
+        return 1;
+    if (tok->type==NUMBER_INT && par->data_type==SymTab_DataType_Integer)
+        return 1;
+    if (tok->type==ID)
+    {
+        SymTab_DataType typ=sym_tab_find(CurrentST,tok->string_hodnota)->data_type;
+        if (typ==par->data_type)
+            return 1;
+    }
+    Error(4);
+    return 0;
+}
+
 int Expr_Analysis()
 {
     token* tok=GetToken(soubor);
@@ -101,20 +126,36 @@ int Expr_Analysis()
         if (sym_tab_find(GlobalST,tok->string_hodnota)!=NULL)
         {
             char* funid=tok->string_hodnota;
+            SymTab_Element* pom = sym_tab_find(GlobalST,funid);
             tok=GetToken(soubor);
             PrintToken(tok);
+
             if (tok->type==KULATA_ZAV_ZAC)
             {
                 tok=GetToken(soubor);
                 PrintToken(tok);
+
+                int i = 0;
                 while(tok->type!=KULATA_ZAV_KON)
                 {
                     if (!(tok->type==RETEZEC || tok->type==NUMBER_DOUBLE || tok->type==NUMBER_INT || tok->type==ID))
                     {
-                    return 0;
+                        Error(4);
+                        return 0;
                     }
-
+                    if (i==pom->paramcount)
+                    {
+                        Error(4);
+                    }
+                    char* str=pom->pararr->par[i];
+                    SymTab_Element* par=sym_tab_find(pom->localtable,str);
+                    if (SameType(par,tok,pom)==0)
+                    {
+                        Error(4);
+                    }
                     PushParam(tok);
+
+                    i++;
 
                     tok=GetToken(soubor);
                     PrintToken(tok);
@@ -124,20 +165,26 @@ int Expr_Analysis()
                     }
                     if (tok->type!=CARKA)
                     {
-                    return 0;
+                        Error(2);
+                        return 0;
                     }
                     tok=GetToken(soubor);
                     PrintToken(tok);
                 }
-
+                if (i!=pom->paramcount)
+                {
+                    Error(4);
+                }
                 if (tok->type!=KULATA_ZAV_KON)
                 {
+                    Error(2);
                     return 0;
                 }
                 tok=GetToken(soubor);
                 PrintToken(tok);
                 if (tok->type!=tEOL)
                 {
+                    Error(2);
                     return 0;
                 }
 
@@ -162,13 +209,14 @@ int Expr_Analysis()
                     Call_fun(funid);
                 }
             }
+            return 1;
         }
     }
 
     zasobnik = (tStack*) malloc(sizeof(tStack));
     stackInit(zasobnik);
     int index=0;
-
+    token* pred=NULL;
     while (1)
     {
         int i = ValidType(tok);
@@ -197,8 +245,37 @@ int Expr_Analysis()
         {
             return 0;
         }
+        pred=tok;
         tok=GetToken(soubor);
         PrintToken(tok);
+        if (ValidType(tok)==1 && ValidType(pred)==1)
+        {
+            Error(2);
+        }
+        else if (ValidType(pred)==4 && ValidType(tok)==4)
+        {
+            Error(2);
+        }
+        else if (ValidType(pred)==1 && ValidType(tok)==2)
+        {
+            Error(2);
+        }
+        else if (ValidType(pred)==1 && ValidType(tok)==2)
+        {
+            Error(2);
+        }
+        else if (ValidType(pred)==3 && ValidType(tok)==1)
+        {
+            Error(2);
+        }
+        else if (ValidType(pred)==2 && ValidType(tok)==4)
+        {
+            Error(2);
+        }
+        else if (ValidType(pred)==4 && ValidType(tok)==3)
+        {
+            Error(2);
+        }
     }
 
     UngetToken(tok);
@@ -211,9 +288,19 @@ int Expr_Analysis()
     }
     if (index==1)
     {
-        PushParam(postfixexp[0]);
-        return 1;
+        if (writeout==1)
+        {
+            PushRetVal(postfixexp[0]);
+            writeout=0;
+            return 1;
+        }
+        else
+        {
+            PushParam(postfixexp[0]);
+            return 1;
+        }
     }
+
     int i=0;
     for (;i<index;i++)
     {

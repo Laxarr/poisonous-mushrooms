@@ -1,3 +1,10 @@
+/********* debug.c *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Ondrej Brekl, xbrekl00
+ * Summary: Vypis tokenu.
+ *
+ */
 #include "debug.h"
 
 int debugg=0;

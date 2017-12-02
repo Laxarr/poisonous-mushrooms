@@ -1,3 +1,10 @@
+/********* symtable.h *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Martin Gajdosik, xgajdo21
+ * Summary: Tabulka symbolu.
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>

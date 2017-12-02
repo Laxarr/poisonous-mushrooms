@@ -1,4 +1,10 @@
-
+/********* stack.h *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Ondrej Brekl, xbrekl00
+ * Summary: Zasobnik.
+ *
+ */
 #ifndef STACK
 #define STACK
 

@@ -1,3 +1,10 @@
+/********* string.c *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Martin Gajdosik, xgajdo21
+ * Summary: Operace s retezci.
+ *
+ */
 #include "string.h"
 
 #define ALLOC_SIZE 100
@@ -67,5 +74,7 @@ int InsertPar(pararray* p,char* id)
     p->par[p->parcount]=(char*) malloc(strlen(id)*sizeof(char));
     strcpy(p->par[p->parcount], id);
     p->par[p->parcount][strlen(id)]='\0';
+    p->parcount++;
     return 1;
 }
+

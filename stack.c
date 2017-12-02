@@ -1,3 +1,10 @@
+/********* stack.c *********
+ *
+ * FIT VUT, IFJ 119
+ * Author: Ondrej Brekl, xbrekl00
+ * Summary: Zasobnik.
+ *
+ */
 #include "stack.h"
 
 void stackInit (tStack* zasobnik)
@@ -30,3 +37,4 @@ void stackPush (token* tok,tStack* zasobnik)
     zasobnik->top++;
     zasobnik->arr[zasobnik->top]=tok;
 }
+
