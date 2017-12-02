@@ -90,24 +90,15 @@ int Program()//Program
 {
     token* tok=GetToken(soubor);
     PrintToken(tok);
-    if (tok->type==tEOL)
-    {
-        UngetToken(tok);
-        DeleteEOL();
-    }
-    else
-        UngetToken(tok);
-
-    tok=GetToken(soubor);
-    PrintToken(tok);
     if (tok->type==tEOF)
     {
-        return 1;
+        Error(2);
+        return 0;
     }
     else
     {
         UngetToken(tok);
-        return (Fun() && Main() && Program());
+        return (Fun() && Main());
     }
 }
 
@@ -288,9 +279,15 @@ int FunDef()//Definice funkce
     }
     else
     {
+        if (pom->initialized==1)
+        {
+            Error(3);
+        }
         declared=1;
         CurrentST=pom->localtable;
     }
+
+    pom->initialized=1;
 
     tok=GetToken(soubor);
     PrintToken(tok);
@@ -600,6 +597,10 @@ int Stat()//Blok prikazu
         UngetToken(tok);
         return 1;
     }
+    else if (tok->type==SCOPE)
+    {
+        Error(2);
+    }
 
     UngetToken(tok);
     return Stat();
@@ -610,6 +611,10 @@ int S()//Prikaz
     DeleteEOL();
     token* tok=GetToken(soubor);
     PrintToken(tok);
+    if (tok->type==FUNCTION || tok->type==DECLARE || tok->type==SCOPE)
+    {
+        Error(2);
+    }
     if (tok->type==DIM)//Deklarace promenne
     {
         tok=GetToken(soubor);
@@ -860,13 +865,7 @@ int Else()
 {
     token* tok=GetToken(soubor);
     PrintToken(tok);
-    /*
-    if (tok->type==END)
-    {
-        UngetToken(tok);
-        return 1;
-    }
-*/
+
     if (tok->type!=ELSE)
     {
         Error(2);

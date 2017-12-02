@@ -127,7 +127,7 @@ SymTab_Element* create_sym_tab_elem_fun(char* id, SymTab_DataType data)
         new_elem_ptr->id=id;
         new_elem_ptr->elem_type=SymTab_ElemType_Fun;
         new_elem_ptr->data_type=data;
-        new_elem_ptr->declared=0;
+        new_elem_ptr->declared=1;
         new_elem_ptr->initialized=0;
         new_elem_ptr->paramcount=0;
         new_elem_ptr->pararr=malloc(sizeof(pararray));

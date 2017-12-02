@@ -37,7 +37,14 @@ int ValidType(token* tok)
     else if (tok->type == MENSI_ROVNO) return 4;
     else if (tok->type == VETSI_ROVNO) return 4;
     else if (tok->type == ROVNOST) return 4;
-    else if (tok->type == ID) return 1;
+    else if (tok->type == ID)
+    {
+        if (sym_tab_find(CurrentST,tok->string_hodnota)==NULL)
+        {
+            Error(3);
+        }
+        return 1;
+    }
     else if (tok->type == NUMBER_INT) return 1;
     else if (tok->type == NUMBER_DOUBLE) return 1;
     else if (tok->type == KULATA_ZAV_ZAC) return 2;
@@ -94,7 +101,7 @@ void doOperation (token* tok,int* index )
     }
 }
 
-int SameType(SymTab_Element* par,token* tok,SymTab_Element* fun)
+int SameType(SymTab_Element* par,token* tok)
 {
     if (tok->type==RETEZEC && par->data_type==SymTab_DataType_String)
         return 1;
@@ -116,6 +123,9 @@ int Expr_Analysis()
 {
     token* tok=GetToken(soubor);
     PrintToken(tok);
+    if (tok->type==tEOL || tok->type==STREDNIK || tok->type==THEN)
+        Error(2);
+
     if (tok->type==ID || tok->type==LENGTH || tok->type==SUBSTR || tok->type==ASC || tok->type==CHR)//volani funkce
     {
         if (tok->type==LENGTH) tok->string_hodnota="Length";
@@ -149,7 +159,7 @@ int Expr_Analysis()
                     }
                     char* str=pom->pararr->par[i];
                     SymTab_Element* par=sym_tab_find(pom->localtable,str);
-                    if (SameType(par,tok,pom)==0)
+                    if (SameType(par,tok)==0)
                     {
                         Error(4);
                     }
@@ -211,12 +221,19 @@ int Expr_Analysis()
             }
             return 1;
         }
+        if (sym_tab_find(CurrentST,tok->string_hodnota)==NULL)
+        {
+            Error(3);
+        }
     }
 
     zasobnik = (tStack*) malloc(sizeof(tStack));
     stackInit(zasobnik);
     int index=0;
     token* pred=NULL;
+    if (ValidType(tok)==4)
+        Error(2);
+
     while (1)
     {
         int i = ValidType(tok);
@@ -243,7 +260,7 @@ int Expr_Analysis()
         }
         else
         {
-            return 0;
+            Error(2);
         }
         pred=tok;
         tok=GetToken(soubor);

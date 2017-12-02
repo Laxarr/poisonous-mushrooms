@@ -34,7 +34,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 		return 1;
 }
 
-token* GetToken(FILE* soubor)
+token* GetToken()
     {
         if (returned!=NULL)
         {
@@ -122,14 +122,6 @@ token* GetToken(FILE* soubor)
 					else if (znak == '/') { state = 12;
 						 }
 
-					else if (znak == '@') {
-						state = 0;
-					}
-
-					else if (znak == '#') {
-						state = 9;
-					}
-
 					else if (znak == '\0') {
 						state = 0;
 						 }
@@ -145,37 +137,9 @@ token* GetToken(FILE* soubor)
 						state = 10;
 					}
 
-					else if (znak == '$') {
-						Error(1);
-					}
-
-					else if (znak == '^') {
-						Error(1);
-					}
-
-					else if (znak == '`') {
-						Error(1);
-					}
-					else if (znak == '~') {
-						Error(1);
-					}
-					else if (znak == '&') {
-						Error(1);
-					}
 					else if (znak == '_') {
 						state = 6;
 						AddChar(buff, znak); }
-
-					else if (znak == '|') {
-						Error(1);
-					}
-
-					else if (znak == '.') {
-						tok->type = TECKA;
-						FreeBuffer(buff);
-						free(buff);
-						return tok;
-					}
 
 					else if (znak == ',') {
 						tok->type = CARKA;
@@ -203,18 +167,6 @@ token* GetToken(FILE* soubor)
 
 					}
 
-					else if (znak == ':') {
-						Error(1);
-					}
-
-					else if (znak == '"') {
-						Error(1);
-					}
-
-					else if (znak == '%') {
-						Error(1);
-					}
-
 					else if (znak == 39) {   //radkovy komentar
 						state = 9;
 					}
@@ -222,22 +174,6 @@ token* GetToken(FILE* soubor)
 					else if (znak == '<') {	state = 3; AddChar(buff, znak);	}
 
 					else if (znak == '>') {	state = 4; AddChar(buff, znak); }
-
-
-					else if (znak == '{') {
-						Error(1);
-					}
-					else if (znak == '}') {
-						Error(1);
-					}
-
-					else if (znak == '[') {
-						Error(1);
-					}
-
-					else if (znak == ']') {
-						Error(1);
-					}
 
 					else if (znak == '(') {
                         tok->type = KULATA_ZAV_ZAC;
@@ -252,7 +188,8 @@ token* GetToken(FILE* soubor)
 						return tok;
 					}
 
-					// chybi zpetne lomitko \ a tohle '
+					else
+                        Error(1);
 					break;
 
 			case 1: //CELE CISLO
@@ -464,6 +401,10 @@ token* GetToken(FILE* soubor)
 
                          if (znak== 'n' || znak== 't' || znak==92 || znak == 34)
                          {
+                             if (escapeseccount>0)
+                             {
+                                 Error(1);
+                             }
                              if (znak== 'n')
                              {
                                  AddChar(buff,'0');
@@ -482,7 +423,7 @@ token* GetToken(FILE* soubor)
                                  AddChar(buff,'9');
                                  AddChar(buff,'2');
                              }
-                             else
+                             else if (znak==34)
                              {
                                  AddChar(buff,'0');
                                  AddChar(buff,'3');
@@ -525,6 +466,10 @@ token* GetToken(FILE* soubor)
                         escapesec++;
                         AddChar(buff,znak);
 					 }
+					 else if (znak=='\n' || znak==EOF)
+                     {
+                         Error(1);
+                     }
 					 else {
 					 		AddChar(buff, znak);
 					 }

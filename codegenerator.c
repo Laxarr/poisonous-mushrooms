@@ -137,20 +137,20 @@ void PushParam(token* tok)
 
 void Call_fun(char* id)
 {
-    fprintf(stdout,"PUSHFRAME\n");
-    fprintf(stdout,"CALL %s\n",id);
-    fprintf(stdout,"POPFRAME\n");
+    printf("PUSHFRAME\n");
+    printf("CALL %s\n",id);
+    printf("POPFRAME\n");
 }
 
 void Declare_fun(char* id)
 {
-    fprintf(stdout,"LABEL %s\n",id);
-    fprintf(stdout,"CREATEFRAME\n");
+    printf("LABEL %s\n",id);
+    printf("CREATEFRAME\n");
     for (int i=0;i<sym_tab_find(GlobalST,id)->paramcount;i++)
     {
         SymTab_Element* fun=sym_tab_find(GlobalST,id);
-        fprintf(stdout,"DEFVAR TF@%s\n",fun->pararr->par[i]);
-        fprintf(stdout,"POPS TF@%s\n",fun->pararr->par[i]);
+        printf("DEFVAR TF@%s\n",fun->pararr->par[i]);
+        printf("POPS TF@%s\n",fun->pararr->par[i]);
     }
 }
 

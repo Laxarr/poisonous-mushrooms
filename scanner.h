@@ -96,7 +96,7 @@ typedef enum {
 
     token* returned;
 
-	token* GetToken(FILE* soubor);
+	token* GetToken();
 	int AllowedNextChar(char znak);
     void UngetToken(token* tok);
 #endif
