@@ -119,6 +119,14 @@ int Main()//Hlavni telo programu
         return 0;
     }
 
+    tok=GetToken(soubor);
+    PrintToken(tok);
+    if (tok->type!=tEOL)
+    {
+        Error(2);
+        return 0;
+    }
+
     int i=Stat();
     if (i==0)
         return 0;
@@ -143,7 +151,7 @@ int Main()//Hlavni telo programu
     PrintToken(tok);
     if (tok->type!=tEOF)
     {
-        Error(1);
+        Error(2);
     }
     return 1;
 }
@@ -491,8 +499,19 @@ int Par()//Parametr funkce
         Error(2);
         return 0;
     }
-
     char* idpar=tok->string_hodnota;
+    if (sym_tab_find(GlobalST,idpar)!=NULL)
+    {
+        Error(3);
+    }
+    if (sym_tab_find(CurrentST,idpar)!=NULL)
+    {
+        Error(3);
+    }
+    if (strcmp(idpar,currentfun)==0)
+    {
+        Error(3);
+    }
     if (declared==1)
     {
         if (sym_tab_find(CurrentST,idpar)==NULL)

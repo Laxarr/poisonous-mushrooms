@@ -27,7 +27,7 @@ int Is_Keyword(const char *nacteny_text) {
 }
 
 int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mnozine povolenych znaku napr. 123+14 ,zde to plus
-	if ((znak==';') || (znak=='/') || (znak=='*') || (znak=='+') || (znak=='-') || (znak==')') || (znak=='=')
+	if ((znak==';') || (znak=='/') || (znak=='*') || (znak=='+') || (znak==92) || (znak=='-') || (znak==')') || (znak=='=')
 		|| (znak=='>') || (znak=='<') || (znak==',') || (isspace(znak)) || (znak == EOF))
 		return 0;
 	else
@@ -58,6 +58,7 @@ token* GetToken()
 	int zacatek_bezNuly = 0;
     int escapesec=0;
     int escapeseccount=0;
+    int value=0;
 
     int state = 0; //Konecny automat
 
@@ -127,7 +128,10 @@ token* GetToken()
 						 }
 
 					else if (znak == 92) {
-						state = 0;
+						tok->type = CELO_CIS_DELENI;
+						FreeBuffer(buff);
+						free(buff);
+						return tok;
 						 }
 
 					else if (znak == '\n') {
@@ -433,12 +437,19 @@ token* GetToken()
                          }
                          else if (isdigit(znak))
                          {
+                             value*=10;
+                             value +=znak-48;
                              AddChar(buff,znak);
                              escapeseccount++;
                              if (escapeseccount==3)
                              {
                                  escapesec=0;
                                  escapeseccount=0;
+                                 if (value>255 || value<1)
+                                 {
+                                     Error(1);
+                                 }
+                                 value=0;
                              }
                          }
                          else

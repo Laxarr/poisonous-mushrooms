@@ -29,7 +29,7 @@ void IfCond();
 void Iftrueend();
 void IfElse();
 void IfEnd();
-void Operation(token* operation,token* op1,token* op2);
+token* Operation(token* operation,token* op1,token* op2);
 void LoopStart();
 void LoopCond();
 void LoopEnd();

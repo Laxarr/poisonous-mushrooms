@@ -6,11 +6,13 @@
  *
  */
 #include "codegenerator.h"
-#define STRINGSIZE 10
 
 int ifelsecount=0;
 int dowhilecount=0;
 int concat=0;
+int tempvarcount=0;
+SymTab_Element* op1pom=NULL;
+SymTab_Element* op2pom=NULL;
 
 void Program_begin()
 {
@@ -161,13 +163,7 @@ void Declare_funend()
 
 void AssignVal(char* id)
 {
-    SymTab_Element* pom=sym_tab_find(CurrentST,id);
-    if (pom->data_type == SymTab_DataType_Integer)
-    {
-        fprintf(stdout,"FLOAT2INTS\n");
-    }
     fprintf(stdout,"POPS TF@%s\n",id);
-
 }
 
 void Length()
@@ -192,251 +188,240 @@ void Chr()
     fprintf(stdout,"INT2CHARS\n");
 }
 
+char* GetOperator(token* operation)
+{
+    if (operation->type==PLUS)
+        return "ADD";
+    else if (operation->type==MINUS)
+        return "SUB";
+    else if (operation->type==DELENI)
+        return "DIV";
+    else if (operation->type==CELO_CIS_DELENI)
+        return "DIV";
+    else if (operation->type==NASOBENI)
+        return "MUL";
+    else if (operation->type==VETSI)
+        return "GT";
+    else if (operation->type==MENSI)
+        return "LT";
+    else
+        return "EQ";
+}
+
 void CheckOperands(token* operation,token* op1,token* op2)
 {
-    SymTab_Element* op1pom=NULL;
-    SymTab_Element* op2pom=NULL;
-    if (op1 != NULL && op2!=NULL)
-    {
         if (op1->type==ID)
             op1pom=sym_tab_find(CurrentST,op1->string_hodnota);
         if (op2->type==ID)
             op2pom=sym_tab_find(CurrentST,op2->string_hodnota);
 
-        if (op1pom==NULL)
+        concat=0;
+        if (op1pom!=NULL)
         {
-            if (op1->type==NUMBER_DOUBLE)
-                fprintf(stdout,"PUSHS float@%f\n",op1->double_hodnota);
-            else if (op1->type==NUMBER_INT)
-            {
-                fprintf(stdout,"PUSHS int@%d\n",op1->int_hodnota);
-                fprintf(stdout,"INT2FLOATS\n");
-            }
+            if (sym_tab_find(CurrentST,op1pom->id)->data_type==SymTab_DataType_String)
+                concat++;
         }
-        else
+        if (op2pom!=NULL)
         {
-            if (sym_tab_find(CurrentST,op1pom->id)->data_type==SymTab_DataType_Integer)
-            {
-                fprintf(stdout,"PUSHS TF@%s\n",op1pom->id);
-                fprintf(stdout,"INT2FLOATS\n");
-            }
-            else
-            {
-                fprintf(stdout,"PUSHS TF@%s\n",op1pom->id);
-            }
+            if (sym_tab_find(CurrentST,op2pom->id)->data_type==SymTab_DataType_String)
+                concat++;
+        }
+        if (op1->type==RETEZEC) concat++;
+        if (op2->type==RETEZEC) concat++;
+
+        if (concat==2)
+        {
+            concat=0;
+            if (op1pom==NULL && op2pom==NULL)
+                printf("CONCAT TF@tempvar%d string@%s string@%s\n",tempvarcount,op1->string_hodnota,op2->string_hodnota);
+            else if (op1pom==NULL && op2pom!=NULL)
+                printf("CONCAT TF@tempvar%d string@%s TF@%s\n",tempvarcount,op1->string_hodnota,op2pom->id);
+            else if (op1pom!=NULL && op2pom!=NULL)
+                printf("CONCAT TF@tempvar%d TF@%s TF@%s\n",tempvarcount,op1pom->id,op2pom->id);
+            else if (op1pom!=NULL && op2pom==NULL)
+                printf("CONCAT TF@tempvar%d TF@%s string@%s\n",tempvarcount,op1pom->id,op2->string_hodnota);
+
+            return;
+
+        }
+        else if (concat!=0)
+        {
+            Error(4);
         }
 
-        if (op2pom==NULL)
-        {
-            if (op2->type==NUMBER_DOUBLE)
-                fprintf(stdout,"PUSHS float@%f\n",op2->double_hodnota);
-            else if (op2->type==NUMBER_INT)
-            {
-                fprintf(stdout,"PUSHS int@%d\n",op2->int_hodnota);
-                fprintf(stdout,"INT2FLOATS\n");
-            }
-        }
-        else
-        {
-            if (sym_tab_find(CurrentST,op2pom->id)->data_type==SymTab_DataType_Integer)
-            {
-                fprintf(stdout,"PUSHS TF@%s\n",op2pom->id);
-                fprintf(stdout,"INT2FLOATS\n");
-            }
-            else
-            {
-                fprintf(stdout,"PUSHS TF@%s\n",op2pom->id);
-            }
-        }
-    }
-    else if (op1==NULL && op2==NULL)
-    {
+        char* op=GetOperator(operation);
 
-    }
-    else if (op2==NULL)
-    {
-        token* tok=op2;
-        op2=op1;
-        op1=tok;
-        printf("POPS GF@pom\n");
-        printf("DEFVAR GF@pom1\n");
-        printf("POPS GF@pom1\n");
-        printf("PUSHS GF@pom\n");
-        printf("PUSHS GF@pom1\n");
-    }
-    else if (op1==NULL)
-    {
-        if (op2->type==ID)
-            op2pom=sym_tab_find(CurrentST,op2->string_hodnota);
-        if (op2pom==NULL)
+        if (op1->type==NUMBER_INT)
         {
-            if (op2->type==NUMBER_DOUBLE)
-                fprintf(stdout,"PUSHS float@%f\n",op2->double_hodnota);
-            else if (op2->type==NUMBER_INT)
-            {
-                fprintf(stdout,"PUSHS int@%d\n",op2->int_hodnota);
-                fprintf(stdout,"INT2FLOATS\n");
-            }
+            op1->double_hodnota=op1->int_hodnota;
         }
-        else
+        if (op2->type==NUMBER_INT)
         {
-            if (sym_tab_find(CurrentST,op2pom->id)->data_type==SymTab_DataType_Integer)
-            {
-                fprintf(stdout,"PUSHS TF@%s\n",op2pom->id);
-                fprintf(stdout,"INT2FLOATS\n");
-            }
-            else
-            {
-                fprintf(stdout,"PUSHS TF@%s\n",op2pom->id);
-            }
+            op2->double_hodnota=op2->int_hodnota;
         }
-    }
+
+        if (op1->type==TEMP && op2->type==TEMP)
+            printf("%s TF@tempvar%d TF@tempvar%d TF@tempvar%d\n",op,tempvarcount,op1->int_hodnota,op2->int_hodnota);
+        else if (op1->type==TEMP && op2pom==NULL)
+            printf("%s TF@tempvar%d TF@tempvar%d float@%g\n",op,tempvarcount,op1->int_hodnota,op2->double_hodnota);
+        else if (op1->type==TEMP && op2pom!=NULL)
+            printf("%s TF@tempvar%d TF@tempvar%d TF@%s\n",op,tempvarcount,op1->int_hodnota,op2pom->id);
+        else if (op1pom==NULL && op2->type==TEMP)
+            printf("%s TF@tempvar%d float@%g TF@tempvar%d\n",op,tempvarcount,op1->double_hodnota,op2->int_hodnota);
+        else if (op1pom!=NULL && op2->type==TEMP)
+            printf("%s TF@tempvar%d TF@%s TF@tempvar%d\n",op,tempvarcount,op1pom->id,op2->int_hodnota);
+        else if (op1pom==NULL && op2pom==NULL)
+            printf("%s TF@tempvar%d float@%g float@%g\n",op,tempvarcount,op1->double_hodnota,op2->double_hodnota);
+        else if (op1pom==NULL && op2pom!=NULL)
+            printf("%s TF@tempvar%d float@%g TF@%s\n",op,tempvarcount,op1->double_hodnota,op2pom->id);
+        else if (op1pom!=NULL && op2pom!=NULL)
+            printf("%s TF@tempvar%d TF@%s TF@%s\n",op,tempvarcount,op1pom->id,op2pom->id);
+        else if (op1pom!=NULL && op2pom==NULL)
+            printf("%s TF@tempvar%d TF@%s float@%g\n",op,tempvarcount,op1pom->id,op2->double_hodnota);
 }
 
-void Operation(token* operation,token* op1,token* op2)
+
+token* Operation(token* operation,token* op1,token* op2)
 {
+    token* tok = (token*) malloc(sizeof(token));
+
     if (operation->type==CELO_CIS_DELENI)
     {
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
-        fprintf(stdout,"DIVS\n");
-        fprintf(stdout,"FLOAT2R2EINTS\n");
+
+
+
+        printf("FLOAT2INT TF@tempvar%d TF@tempvar%d\n",tempvarcount,tempvarcount);
+        printf("INT2FLOAT TF@tempvar%d TF@tempvar%d\n",tempvarcount,tempvarcount);
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
     }
 
     else if (operation->type==DELENI)
     {
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
-        fprintf(stdout,"DIVS\n");
+
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
     }
 
-    else if (operation->type==PLUS)//pridat konkatenanci retezcu
+    else if (operation->type==PLUS)
     {
-        SymTab_Element* op1pom=NULL;
-        SymTab_Element* op2pom=NULL;
-        char* str1=malloc(sizeof(char));
-        char* str2=malloc(sizeof(char));
-        if (op1 != NULL && op2!=NULL)
-        {
-            if (op1->type==ID)
-                op1pom=sym_tab_find(CurrentST,op1->string_hodnota);
-            if (op2->type==ID)
-                op2pom=sym_tab_find(CurrentST,op2->string_hodnota);
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
+        CheckOperands(operation,op1,op2);
 
-            if (op1pom==NULL)
-            {
-                if (op1->type==RETEZEC)
-                {
-                    fprintf(stdout,"PUSHS string@%s\n",op1->string_hodnota);
-                    concat++;
-                    str1 = realloc(str1, strlen(op1->string_hodnota));
-                    strcat(str1,"string@");
-                    strcat(str1,op1->string_hodnota);
-                }
-            }
-            else
-            {
-                if (sym_tab_find(CurrentST,op1pom->id)->data_type==SymTab_DataType_String)
-                {
-                    fprintf(stdout,"PUSHS TF@%s\n",op1pom->id);
-                    concat++;
-                    str1 = realloc(str1, strlen(op1pom->id));
-                    strcpy(str1, op1pom->id);
-                }
-            }
-
-            if (op2pom==NULL)
-            {
-                if (op2->type==RETEZEC)
-                {
-                    fprintf(stdout,"PUSHS string@%s\n",op2->string_hodnota);
-                    concat++;
-                    str2 = realloc(str2, strlen(op2->string_hodnota));
-                    strcat(str2,"string@");
-                    strcat(str2,op2->string_hodnota);
-                }
-            }
-            else
-            {
-                if (sym_tab_find(CurrentST,op2pom->id)->data_type==SymTab_DataType_String)
-                {
-                    fprintf(stdout,"PUSHS TF@%s\n",op2pom->id);
-                    concat++;
-                    str2 = realloc(str2, strlen(op2pom->id));
-                    strcpy(str2, op2pom->id);
-                }
-            }
-        }
-
-        if (concat==2)
-        {
-            fprintf(stdout,"CONCAT GF@pom %s %s\n",str1,str2);
-            fprintf(stdout,"PUSHS GF@pom\n");
-        }
-        else
-        {
-            CheckOperands(operation,op1,op2);
-            fprintf(stdout,"ADDS\n");
-        }
-        free(str1);
-        free(str2);
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
     }
-
     else if (operation->type==MINUS)
     {
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
-        printf("SUBS\n");
+
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
     }
 
     else if (operation->type==NASOBENI)
     {
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
-        printf("MULS\n");
+
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
     }
 
     else if (operation->type==MENSI)
     {
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
-        printf("LTS\n");
+
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
     }
 
     else if (operation->type==VETSI)
     {
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
-        printf("GTS\n");
-    }
 
-    else if (operation->type==VETSI_ROVNO)
-    {
-        CheckOperands(operation,op1,op2);
-        printf("GTS\n");
-
-        CheckOperands(operation,op1,op2);
-        printf("EQS\n");
-
-        printf("ORS\n");
-    }
-
-    else if (operation->type==MENSI_ROVNO)
-    {
-        CheckOperands(operation,op1,op2);
-        printf("LTS\n");
-
-        CheckOperands(operation,op1,op2);
-        printf("EQS\n");
-
-        printf("ORS\n");
-    }
-
-    else if (operation->type==NEROVNOST)
-    {
-        CheckOperands(operation,op1,op2);
-        printf("EQS\n");
-
-        printf("NOTS\n");
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
     }
 
     else if (operation->type==ROVNOST)
     {
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
-        printf("EQS\n");
+
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
     }
+
+    else if (operation->type==VETSI_ROVNO)
+    {
+        tok->type=VETSI;
+        token* tok1=Operation(tok,op1,op2);
+
+        tok->type=ROVNOST;
+        token* tok2=Operation(tok,op1,op2);
+
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
+        printf("OR TF@tempvar%d TF@tempvar%d TF@tempvar%d\n",tempvarcount,tok1->int_hodnota,tok2->int_hodnota);
+
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
+    }
+
+    else if (operation->type==MENSI_ROVNO)
+    {
+        tok->type=MENSI;
+        token* tok1=Operation(tok,op1,op2);
+
+        tok->type=ROVNOST;
+        token* tok2=Operation(tok,op1,op2);
+
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
+        printf("OR TF@tempvar%d TF@tempvar%d TF@tempvar%d\n",tempvarcount,tok1->int_hodnota,tok2->int_hodnota);
+
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
+    }
+
+    else if (operation->type==NEROVNOST)
+    {
+        tok->type=ROVNOST;
+        token* tok1=Operation(tok,op1,op2);
+
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount);
+        printf("NOT TF@tempvar%d TF@tempvar%d\n",tempvarcount,tok1->int_hodnota);
+
+        tok->type=TEMP;
+        tok->int_hodnota=tempvarcount;
+        tempvarcount++;
+        return tok;
+    }
+    return NULL;
 }

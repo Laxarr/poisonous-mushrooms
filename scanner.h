@@ -48,6 +48,7 @@ typedef enum {
 		ROVNOST,
 		NUMBER_DOUBLE,
 		NUMBER_INT,
+		TEMP,
 		ASC,		//KLICOVA SLOVA
 		DECLARE,
 		DIM,

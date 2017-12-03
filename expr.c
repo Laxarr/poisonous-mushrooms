@@ -129,9 +129,9 @@ int Expr_Analysis()
     if (tok->type==ID || tok->type==LENGTH || tok->type==SUBSTR || tok->type==ASC || tok->type==CHR)//volani funkce
     {
         if (tok->type==LENGTH) tok->string_hodnota="Length";
-        if (tok->type==SUBSTR) tok->string_hodnota="SubStr";
-        if (tok->type==ASC) tok->string_hodnota="Asc";
-        if (tok->type==CHR) tok->string_hodnota="Chr";
+        else if (tok->type==SUBSTR) tok->string_hodnota="SubStr";
+        else if (tok->type==ASC) tok->string_hodnota="Asc";
+        else if (tok->type==CHR) tok->string_hodnota="Chr";
 
         if (sym_tab_find(GlobalST,tok->string_hodnota)!=NULL)
         {
@@ -192,12 +192,13 @@ int Expr_Analysis()
                 }
                 tok=GetToken(soubor);
                 PrintToken(tok);
-                if (tok->type!=tEOL)
+                if (tok->type!=STREDNIK)
                 {
-                    Error(2);
-                    return 0;
+                    if (tok->type!=tEOL)
+                    {
+                        Error(2);
+                    }
                 }
-
                 if (strcmp(funid,"Length")==0)
                 {
                     Length();
@@ -218,6 +219,7 @@ int Expr_Analysis()
                 {
                     Call_fun(funid);
                 }
+                UngetToken(tok);
             }
             return 1;
         }
@@ -333,11 +335,11 @@ int Expr_Analysis()
             stackPop(zasobnik);
             token* op1=stackTop(zasobnik);
             stackPop(zasobnik);
-            Operation(op,op1,op2);
-            stackPush(NULL,zasobnik);
+            stackPush(Operation(op,op1,op2),zasobnik);
         }
 
     }
+    printf("PUSHS TF@tempvar%d\n",tempvarcount-1);
     stackPop(zasobnik);
     return 1;
 }
