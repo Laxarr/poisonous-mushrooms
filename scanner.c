@@ -151,12 +151,6 @@ token* GetToken()
 						free(buff);
 						return tok;
 					}
-					else if (znak == '?') {
-						tok->type = OTAZNIK;
-						FreeBuffer(buff);
-						free(buff);
-						return tok;
-					}
 					else if (znak == ';') {
 						tok->type = STREDNIK;
 						FreeBuffer(buff);

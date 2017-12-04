@@ -25,6 +25,8 @@ void PushParam(token* tok);
 void Declare_fun(char* id);
 void PushRetVal(token* tok);
 void Declare_funend();
+void ConvertToInt();
+void ImplicitReturn();
 void IfCond();
 void Iftrueend();
 void IfElse();
@@ -41,5 +43,6 @@ int dowhilecount;
 int ifelsecount;
 int tempvarcount;
 int writeout;
+int cycle;
 #endif
 

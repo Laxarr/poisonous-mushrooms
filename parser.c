@@ -9,15 +9,6 @@
 
 int main ()
 {
-/*
-    token* tok = GetToken(soubor);
-    while (tok->type!=tEOF)
-    {
-        PrintToken(tok);
-        tok = GetToken(soubor);
-    }
-    PrintToken(tok);
-*/
     Parse();
 	return 0;
 }
@@ -474,7 +465,11 @@ int Fun()//Deklarace a definice funkci
         tok=GetToken(soubor);
         PrintToken(tok);
     }
-
+    if (fdec==-1 && fdef==-1)
+    {
+        if (tok->type!=SCOPE)
+            Error(2);
+    }
     if (fdec==-1)
     {
         fdec=1;
@@ -504,13 +499,16 @@ int Par()//Parametr funkce
     {
         Error(3);
     }
-    if (sym_tab_find(CurrentST,idpar)!=NULL)
-    {
-        Error(3);
-    }
     if (strcmp(idpar,currentfun)==0)
     {
         Error(3);
+    }
+    for (int i = 0;i<sym_tab_find(GlobalST,currentfun)->paramcount;i++)
+    {
+        if (strcmp(idpar,sym_tab_find(GlobalST,currentfun)->pararr->par[i])==0)
+        {
+            Error(3);
+        }
     }
     if (declared==1)
     {
@@ -703,6 +701,13 @@ int S()//Prikaz
         else
             UngetToken(tok);
 
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=tEOL)
+        {
+            Error(2);
+            return 0;
+        }
         return 1;
     }
     else if (tok->type==ID) //Prirazeni ID=E
@@ -726,6 +731,13 @@ int S()//Prikaz
             return 0;
         }
         AssignVal(pom->id);
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=tEOL)
+        {
+            Error(2);
+            return 0;
+        }
         return 1;
     }
     else if (tok->type==INPUT)//INPUT ID
@@ -746,6 +758,11 @@ int S()//Prikaz
         Read(tok);
         tok=GetToken(soubor);
         PrintToken(tok);
+        if (tok->type!=tEOL)
+        {
+            Error(2);
+            return 0;
+        }
     }
     else if (tok->type==PRINT)//PRINT OUT
     {
@@ -759,7 +776,23 @@ int S()//Prikaz
             Error(2);
             return 0;
         }
-        return E();
+        i = E();
+        if (i==0)
+        {
+            return 0;
+        }
+        if (sym_tab_find(GlobalST,currentfun)->data_type==SymTab_DataType_Integer)
+        {
+            ConvertToInt();
+        }
+        tok=GetToken(soubor);
+        PrintToken(tok);
+        if (tok->type!=tEOL)
+        {
+            Error(2);
+            return 0;
+        }
+        return 1;
     }
     else if (tok->type==IF)//If else
     {

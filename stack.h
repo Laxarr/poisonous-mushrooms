@@ -17,6 +17,7 @@
 typedef struct {
 	token* arr[STACKSIZE];
 	int top;
+	int allocsize;
 } tStack;
 
 
@@ -26,5 +27,4 @@ int stackFull (tStack* zasobnik);
 token* stackTop (tStack* zasobnik);
 void stackPop (tStack* zasobnik);
 void stackPush (token* tok,tStack* zasobnik);
-
 #endif

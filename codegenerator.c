@@ -11,72 +11,79 @@ int ifelsecount=0;
 int dowhilecount=0;
 int concat=0;
 int tempvarcount=0;
+int cycle=0;
 SymTab_Element* op1pom=NULL;
 SymTab_Element* op2pom=NULL;
 
 void Program_begin()
 {
-    fprintf(stdout,".IFJcode17\n");
-    fprintf(stdout,"DEFVAR GF@pom\n");
-    fprintf(stdout,"JUMP main\n");
+    printf(".IFJcode17\n");
+    printf("DEFVAR GF@pom\n");
+    printf("JUMP main\n");
 }
 
 void Main_fun()
 {
-    fprintf(stdout,"LABEL main\n");
-    fprintf(stdout,"CREATEFRAME\n");
+    printf("LABEL main\n");
+    printf("CREATEFRAME\n");
 }
 
 void IfCond()
 {
-    fprintf(stdout,"PUSHS bool@true\n");
-    fprintf(stdout,"JUMPIFNEQS ifelse%d\n",ifelsecount);
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS ifelse%d\n",ifelsecount);
 }
 
 void Iftrueend()
 {
-    fprintf(stdout,"JUMP ifelseend%d\n",ifelsecount);
+    printf("JUMP ifelseend%d\n",ifelsecount);
 }
 
 void IfElse()
 {
-    fprintf(stdout,"LABEL ifelse%d\n",ifelsecount);
+    printf("LABEL ifelse%d\n",ifelsecount);
 }
 
 void IfEnd()
 {
-    fprintf(stdout,"LABEL ifelseend%d\n",ifelsecount);
+    printf("LABEL ifelseend%d\n",ifelsecount);
     ifelsecount++;
 }
 
 void LoopStart()
 {
-    fprintf(stdout,"LABEL while%d\n",dowhilecount);
+    cycle=1;
+    for (int i=0;i<10;i++)
+    {
+        printf("DEFVAR TF@tempvar%d\n",tempvarcount+i);
+    }
+    printf("LABEL while%d\n",dowhilecount);
 }
 
 void LoopCond()
 {
-    fprintf(stdout,"PUSHS bool@true\n");
-    fprintf(stdout,"JUMPIFNEQS whileend%d\n",dowhilecount);
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS whileend%d\n",dowhilecount);
 }
 
 void LoopEnd()
 {
-    fprintf(stdout,"JUMP while%d\n",dowhilecount);
-    fprintf(stdout,"LABEL whileend%d\n",dowhilecount);
+    printf("JUMP while%d\n",dowhilecount);
+    printf("LABEL whileend%d\n",dowhilecount);
     dowhilecount++;
+    cycle=0;
 }
 
 void Declare_var(char* id)
 {
-    fprintf(stdout,"DEFVAR TF@%s\n",id);
+    printf("DEFVAR TF@%s\n",id);
     SymTab_Element* pom= sym_tab_find(CurrentST,id);
     if (pom->data_type==SymTab_DataType_Double)
-        fprintf(stdout,"MOVE TF@%s float@0.0\n",id);
+        printf("MOVE TF@%s float@0.0\n",id);
     else if (pom->data_type==SymTab_DataType_Integer)
-        fprintf(stdout,"MOVE TF@%s int@0\n",id);
+        printf("MOVE TF@%s int@0\n",id);
     else if (pom->data_type==SymTab_DataType_String)
-        fprintf(stdout,"MOVE TF@%s string@""\n",id);
+        printf("MOVE TF@%s string@""\n",id);
 }
 
 void Read(token* var)//vyresit znak pro mezernik
@@ -86,11 +93,20 @@ void Read(token* var)//vyresit znak pro mezernik
     printf("032\n");
     SymTab_Element* pom=sym_tab_find(CurrentST,var->string_hodnota);
     if (pom->data_type==SymTab_DataType_Double)
-        fprintf(stdout,"READ TF@%s float\n",var->string_hodnota);
+        printf("READ TF@%s float\n",var->string_hodnota);
     else if (pom->data_type==SymTab_DataType_Integer)
-        fprintf(stdout,"READ TF@%s int\n",var->string_hodnota);
+        printf("READ TF@%s int\n",var->string_hodnota);
     else if (pom->data_type==SymTab_DataType_String)
-        fprintf(stdout,"READ TF@%s string\n",var->string_hodnota);
+        printf("READ TF@%s string\n",var->string_hodnota);
+    if (pom->data_type==SymTab_DataType_Integer)
+    {
+        printf("INT2FLOAT TF@%s TF@%s\n",var->string_hodnota,var->string_hodnota);
+    }
+}
+
+void ConvertToInt()
+{
+    printf("FLOAT2INTS\n");
 }
 
 void Write()
@@ -158,20 +174,20 @@ void Declare_fun(char* id)
 
 void Declare_funend()
 {
-    fprintf(stdout,"RETURN\n");
+    printf("RETURN\n");
 }
 
 void AssignVal(char* id)
 {
-    fprintf(stdout,"POPS TF@%s\n",id);
+    printf("POPS TF@%s\n",id);
 }
 
 void Length()
 {
-    fprintf(stdout,"DEFVAR TF@n\n");
-    fprintf(stdout,"POPS TF@n\n");
-    fprintf(stdout,"STRLEN TF@n TF@n\n");
-    fprintf(stdout,"PUSHS TF@n\n");
+    printf("DEFVAR TF@n\n");
+    printf("POPS TF@n\n");
+    printf("STRLEN TF@n TF@n\n");
+    printf("PUSHS TF@n\n");
 }
 
 void SubStr()
@@ -231,6 +247,10 @@ void CheckOperands(token* operation,token* op1,token* op2)
 
         if (concat==2)
         {
+            if (operation->type!=PLUS)
+            {
+                Error(4);
+            }
             concat=0;
             if (op1pom==NULL && op2pom==NULL)
                 printf("CONCAT TF@tempvar%d string@%s string@%s\n",tempvarcount,op1->string_hodnota,op2->string_hodnota);
@@ -278,6 +298,15 @@ void CheckOperands(token* operation,token* op1,token* op2)
             printf("%s TF@tempvar%d TF@%s TF@%s\n",op,tempvarcount,op1pom->id,op2pom->id);
         else if (op1pom!=NULL && op2pom==NULL)
             printf("%s TF@tempvar%d TF@%s float@%g\n",op,tempvarcount,op1pom->id,op2->double_hodnota);
+
+        if (op1->type==NUMBER_INT)
+        {
+            op1->int_hodnota=op1->double_hodnota;
+        }
+        if (op2->type==NUMBER_INT)
+        {
+            op2->int_hodnota=op2->double_hodnota;
+        }
 }
 
 
@@ -287,6 +316,7 @@ token* Operation(token* operation,token* op1,token* op2)
 
     if (operation->type==CELO_CIS_DELENI)
     {
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
 
@@ -302,6 +332,7 @@ token* Operation(token* operation,token* op1,token* op2)
 
     else if (operation->type==DELENI)
     {
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
 
@@ -313,6 +344,7 @@ token* Operation(token* operation,token* op1,token* op2)
 
     else if (operation->type==PLUS)
     {
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
 
@@ -323,6 +355,7 @@ token* Operation(token* operation,token* op1,token* op2)
     }
     else if (operation->type==MINUS)
     {
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
 
@@ -334,6 +367,7 @@ token* Operation(token* operation,token* op1,token* op2)
 
     else if (operation->type==NASOBENI)
     {
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
 
@@ -345,6 +379,7 @@ token* Operation(token* operation,token* op1,token* op2)
 
     else if (operation->type==MENSI)
     {
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
 
@@ -356,6 +391,7 @@ token* Operation(token* operation,token* op1,token* op2)
 
     else if (operation->type==VETSI)
     {
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
 
@@ -367,6 +403,7 @@ token* Operation(token* operation,token* op1,token* op2)
 
     else if (operation->type==ROVNOST)
     {
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         CheckOperands(operation,op1,op2);
 
@@ -380,10 +417,10 @@ token* Operation(token* operation,token* op1,token* op2)
     {
         tok->type=VETSI;
         token* tok1=Operation(tok,op1,op2);
-
         tok->type=ROVNOST;
         token* tok2=Operation(tok,op1,op2);
 
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         printf("OR TF@tempvar%d TF@tempvar%d TF@tempvar%d\n",tempvarcount,tok1->int_hodnota,tok2->int_hodnota);
 
@@ -401,6 +438,7 @@ token* Operation(token* operation,token* op1,token* op2)
         tok->type=ROVNOST;
         token* tok2=Operation(tok,op1,op2);
 
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         printf("OR TF@tempvar%d TF@tempvar%d TF@tempvar%d\n",tempvarcount,tok1->int_hodnota,tok2->int_hodnota);
 
@@ -415,6 +453,7 @@ token* Operation(token* operation,token* op1,token* op2)
         tok->type=ROVNOST;
         token* tok1=Operation(tok,op1,op2);
 
+        if (cycle!=1)
         printf("DEFVAR TF@tempvar%d\n",tempvarcount);
         printf("NOT TF@tempvar%d TF@tempvar%d\n",tempvarcount,tok1->int_hodnota);
 

@@ -153,6 +153,13 @@ int Expr_Analysis()
                         Error(4);
                         return 0;
                     }
+                    if (tok->type==ID)
+                    {
+                        if (sym_tab_find(CurrentST,tok->string_hodnota)==NULL)
+                        {
+                            Error(3);
+                        }
+                    }
                     if (i==pom->paramcount)
                     {
                         Error(4);
@@ -295,6 +302,18 @@ int Expr_Analysis()
         {
             Error(2);
         }
+        else if (ValidType(pred)==3 && ValidType(tok)==2)
+        {
+            Error(2);
+        }
+        else if (ValidType(pred)==2 && ValidType(tok)==3)
+        {
+            Error(2);
+        }
+        else if (ValidType(pred)==4 && ValidType(tok)==5)
+        {
+            Error(2);
+        }
     }
 
     UngetToken(tok);
@@ -335,7 +354,8 @@ int Expr_Analysis()
             stackPop(zasobnik);
             token* op1=stackTop(zasobnik);
             stackPop(zasobnik);
-            stackPush(Operation(op,op1,op2),zasobnik);
+            token* res =Operation(op,op1,op2);
+            stackPush(res,zasobnik);
         }
 
     }

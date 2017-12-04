@@ -10,6 +10,7 @@
 void stackInit (tStack* zasobnik)
 {
     zasobnik->top=-1;
+    zasobnik->allocsize=STACKSIZE;
 }
 
 int stackEmpty (tStack* zasobnik)
@@ -34,7 +35,10 @@ void stackPop (tStack* zasobnik)
 
 void stackPush (token* tok,tStack* zasobnik)
 {
+    if (stackFull(zasobnik))
+    {
+        Error(99);
+    }
     zasobnik->top++;
     zasobnik->arr[zasobnik->top]=tok;
 }
-
