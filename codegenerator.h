@@ -26,6 +26,7 @@ void Declare_fun(char* id);
 void PushRetVal(token* tok);
 void Declare_funend();
 void ConvertToInt();
+void ConvertToFloat();
 void ImplicitReturn();
 void IfCond();
 void Iftrueend();
@@ -44,5 +45,9 @@ int ifelsecount;
 int tempvarcount;
 int writeout;
 int cycle;
+int nestedcycle;
+int asccount;
+int relationcond;
+SymTab_DataType exprtype;
 #endif
 

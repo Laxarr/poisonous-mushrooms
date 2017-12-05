@@ -503,7 +503,7 @@ int Par()//Parametr funkce
     {
         Error(3);
     }
-    for (int i = 0;i<sym_tab_find(GlobalST,currentfun)->paramcount;i++)
+    for (int i = 0;i<sym_tab_find(GlobalST,currentfun)->paramcount-1;i++)
     {
         if (strcmp(idpar,sym_tab_find(GlobalST,currentfun)->pararr->par[i])==0)
         {
@@ -696,6 +696,20 @@ int S()//Prikaz
             int i = E();
             if (i==0)
                 return 0;
+
+            pom=sym_tab_find(CurrentST,varid);
+            if (pom->data_type!=exprtype)
+            {
+                if (pom->data_type==SymTab_DataType_Integer && exprtype==SymTab_DataType_Double)
+                {
+                    ConvertToInt();
+                }
+                else if (pom->data_type==SymTab_DataType_Double && exprtype==SymTab_DataType_Integer)
+                {
+                    ConvertToFloat();
+                }
+                else Error(4);
+            }
             AssignVal(varid);
         }
         else
@@ -725,11 +739,24 @@ int S()//Prikaz
             Error(2);
             return 0;
         }
-        int i= E();
+        int i = E();
         if (i==0)
         {
             return 0;
         }
+        if (pom->data_type!=exprtype)
+        {
+            if (pom->data_type==SymTab_DataType_Integer && exprtype==SymTab_DataType_Double)
+            {
+                ConvertToInt();
+            }
+            else if (pom->data_type==SymTab_DataType_Double && exprtype==SymTab_DataType_Integer)
+            {
+                ConvertToFloat();
+            }
+            else Error(4);
+        }
+
         AssignVal(pom->id);
         tok=GetToken(soubor);
         PrintToken(tok);
@@ -781,10 +808,7 @@ int S()//Prikaz
         {
             return 0;
         }
-        if (sym_tab_find(GlobalST,currentfun)->data_type==SymTab_DataType_Integer)
-        {
-            ConvertToInt();
-        }
+
         tok=GetToken(soubor);
         PrintToken(tok);
         if (tok->type!=tEOL)
@@ -796,11 +820,14 @@ int S()//Prikaz
     }
     else if (tok->type==IF)//If else
     {
-
+        relationcond=0;
         int i=E();
         if (i==0)
             return 0;
-
+        if (relationcond==0)
+        {
+            Error(4);
+        }
         IfCond();
 
         tok=GetToken(soubor);
@@ -868,9 +895,16 @@ int S()//Prikaz
 
         LoopStart();
 
+        relationcond=0;
+
         int i=E();
         if (i==0)
             return 0;
+
+        if (relationcond==0)
+        {
+            Error(4);
+        }
 
         LoopCond();
 
@@ -953,6 +987,7 @@ int Out()
         Error(2);
         return 0;
     }
+
     Write();
 
     tok=GetToken(soubor);

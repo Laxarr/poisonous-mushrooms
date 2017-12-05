@@ -324,6 +324,7 @@ int Expr_Analysis()
         stackPop(zasobnik);
         index++;
     }
+
     if (index==1)
     {
         if (writeout==1)

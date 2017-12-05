@@ -249,6 +249,7 @@ token* GetToken()
 					}
 
 					else if (((znak == 'e') || (znak == 'E')) && (pouze_jedno_e == 0)) {
+                        if (na_konci_je_cislice==0) Error(1);
 						pouze_jedno_e += 1;				// v dc bude pouze jedno 'e', pripadne 'E'	viz horejsi podminka
 						na_konci_je_cislice = 0;		// pokud ted bude konec nejedna se o spravne zapsane cislo
 						AddChar(buff, znak);			// ulozeni do bufferu
@@ -497,6 +498,10 @@ token* GetToken()
 
 			case 13: if (znak == 39) {
 					state = 14; }
+					if (znak==EOF)
+                    {
+                        Error(1);
+                    }
 					break;
 
 			case 14:

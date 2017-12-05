@@ -9,11 +9,9 @@
 
 int ifelsecount=0;
 int dowhilecount=0;
+int typetestcount=0;
 int concat=0;
 int tempvarcount=0;
-int cycle=0;
-SymTab_Element* op1pom=NULL;
-SymTab_Element* op2pom=NULL;
 
 void Program_begin()
 {
@@ -98,15 +96,16 @@ void Read(token* var)//vyresit znak pro mezernik
         printf("READ TF@%s int\n",var->string_hodnota);
     else if (pom->data_type==SymTab_DataType_String)
         printf("READ TF@%s string\n",var->string_hodnota);
-    if (pom->data_type==SymTab_DataType_Integer)
-    {
-        printf("INT2FLOAT TF@%s TF@%s\n",var->string_hodnota,var->string_hodnota);
-    }
 }
 
 void ConvertToInt()
 {
     printf("FLOAT2INTS\n");
+}
+
+void ConvertToFloat()
+{
+    printf("INT2FLOATS\n");
 }
 
 void Write()
@@ -118,13 +117,20 @@ void Write()
 void PushRetVal(token* tok)
 {
     if (tok->type==NUMBER_DOUBLE)
+    {
         printf("PUSHS float@%f\n",tok->double_hodnota);
+        exprtype=SymTab_DataType_Double;
+    }
     else if (tok->type==NUMBER_INT)
     {
         printf("PUSHS int@%d\n",tok->int_hodnota);
+        exprtype=SymTab_DataType_Integer;
     }
     else if (tok->type==RETEZEC)
+    {
         printf("PUSHS string@%s\n",tok->string_hodnota);
+        exprtype=SymTab_DataType_String;
+    }
     else
     {
         printf("PUSHS TF@%s\n",tok->string_hodnota);
@@ -134,22 +140,23 @@ void PushRetVal(token* tok)
 void PushParam(token* tok)
 {
     if (tok->type==NUMBER_DOUBLE)
+    {
         printf("PUSHS float@%f\n",tok->double_hodnota);
+        exprtype=SymTab_DataType_Double;
+    }
     else if (tok->type==NUMBER_INT)
     {
         printf("PUSHS int@%d\n",tok->int_hodnota);
-        printf("INT2FLOATS\n");
+        exprtype=SymTab_DataType_Integer;
     }
     else if (tok->type==RETEZEC)
+    {
         printf("PUSHS string@%s\n",tok->string_hodnota);
+        exprtype=SymTab_DataType_String;
+    }
     else
     {
         printf("PUSHS TF@%s\n",tok->string_hodnota);
-        SymTab_Element* pom=sym_tab_find(CurrentST,tok->string_hodnota);
-        if (pom->data_type==SymTab_DataType_Integer)
-        {
-            printf("INT2FLOATS\n");
-        }
     }
 }
 
@@ -172,6 +179,23 @@ void Declare_fun(char* id)
     }
 }
 
+void ImplicitReturn()
+{
+    SymTab_DataType pom=sym_tab_find(CurrentST,currentfun)->data_type;
+    if (pom==SymTab_DataType_Double)
+    {
+        printf("PUSHS float@0.0\n");
+    }
+    else if (pom==SymTab_DataType_Integer)
+    {
+        printf("PUSHS int@0\n");
+    }
+    else if (pom==SymTab_DataType_String)
+    {
+        printf("PUSHS string@\n");
+    }
+}
+
 void Declare_funend()
 {
     printf("RETURN\n");
@@ -184,24 +208,55 @@ void AssignVal(char* id)
 
 void Length()
 {
-    printf("DEFVAR TF@n\n");
-    printf("POPS TF@n\n");
-    printf("STRLEN TF@n TF@n\n");
-    printf("PUSHS TF@n\n");
+    printf("DEFVAR TF@tempvar%d\n",tempvarcount);
+    printf("POPS TF@tempvar%d\n",tempvarcount);
+    printf("STRLEN TF@tempvar%d TF@tempvar%d\n",tempvarcount,tempvarcount);
+    printf("PUSHS TF@tempvar%d\n",tempvarcount);
+    tempvarcount++;
+    exprtype=SymTab_DataType_Integer;
 }
 
 void SubStr()
 {
+
 }
 
 void Asc()
 {
-    fprintf(stdout,"STRI2INTS\n");
+    printf("DEFVAR TF@tempvar%d\n",tempvarcount+1);
+    printf("POPS TF@tempvar%d\n",tempvarcount+1);
+    printf("DEFVAR TF@tempvar%d\n",tempvarcount);
+    printf("POPS TF@tempvar%d\n",tempvarcount);
+    printf("STRLEN GF@pom TF@tempvar%d\n",tempvarcount);
+    printf("GT GF@pom TF@tempvar%d GF@pom\n",tempvarcount+1);
+    printf("SUB TF@tempvar%d TF@tempvar%d int@1\n",tempvarcount+1,tempvarcount+1);
+    printf("JUMPIFEQ ascfail%d GF@pom bool@true\n",asccount);
+    printf("LT GF@pom TF@tempvar%d int@0\n",tempvarcount+1);
+    printf("JUMPIFEQ ascfail%d GF@pom bool@true\n",asccount);
+    printf("STRI2INT GF@pom TF@tempvar%d TF@tempvar%d\n",tempvarcount,tempvarcount+1);
+    printf("PUSHS GF@pom\n");
+    printf("JUMP ascend%d\n",asccount);
+    printf("LABEL ascfail%d\n",asccount);
+    printf("PUSHS int@0\n");
+    printf("LABEL ascend%d\n",asccount);
+    asccount++;
+    tempvarcount+=2;
+    exprtype=SymTab_DataType_Integer;
 }
 
 void Chr()
 {
-    fprintf(stdout,"INT2CHARS\n");
+    printf("DEFVAR TF@tempvar%d\n",tempvarcount);
+    printf("POPS TF@tempvar%d\n",tempvarcount);
+    printf("TYPE GF@pom TF@tempvar%d\n",tempvarcount);
+    printf("JUMPIFNEQ typecheck%d GF@pom string@float\n",typetestcount);
+    printf("FLOAT2INT TF@tempvar%d TF@tempvar%d\n",tempvarcount,tempvarcount);
+    printf("LABEL typecheck%d\n",typetestcount);
+    printf("PUSHS TF@tempvar%d\n",tempvarcount);
+    printf("INT2CHARS\n");
+    typetestcount++;
+    tempvarcount++;
+    exprtype=SymTab_DataType_String;
 }
 
 char* GetOperator(token* operation)
@@ -226,6 +281,8 @@ char* GetOperator(token* operation)
 
 void CheckOperands(token* operation,token* op1,token* op2)
 {
+        SymTab_Element* op1pom=NULL;
+        SymTab_Element* op2pom=NULL;
         if (op1->type==ID)
             op1pom=sym_tab_find(CurrentST,op1->string_hodnota);
         if (op2->type==ID)
@@ -260,7 +317,7 @@ void CheckOperands(token* operation,token* op1,token* op2)
                 printf("CONCAT TF@tempvar%d TF@%s TF@%s\n",tempvarcount,op1pom->id,op2pom->id);
             else if (op1pom!=NULL && op2pom==NULL)
                 printf("CONCAT TF@tempvar%d TF@%s string@%s\n",tempvarcount,op1pom->id,op2->string_hodnota);
-
+            exprtype=SymTab_DataType_String;
             return;
 
         }
@@ -279,6 +336,24 @@ void CheckOperands(token* operation,token* op1,token* op2)
         {
             op2->double_hodnota=op2->int_hodnota;
         }
+
+        if (op1pom!=NULL)
+        {
+            printf("TYPE GF@pom TF@%s\n",op1pom->id);
+            printf("JUMPIFNEQ typecheck%d GF@pom string@int\n",typetestcount);
+            printf("INT2FLOAT TF@%s TF@%s\n",op1pom->id,op1pom->id);
+            printf("LABEL typecheck%d\n",typetestcount);
+            typetestcount++;
+        }
+        if (op2pom!=NULL)
+        {
+            printf("TYPE GF@pom TF@%s\n",op2pom->id);
+            printf("JUMPIFNEQ typecheck%d GF@pom string@int\n",typetestcount);
+            printf("INT2FLOAT TF@%s TF@%s\n",op2pom->id,op2pom->id);
+            printf("LABEL typecheck%d\n",typetestcount);
+            typetestcount++;
+        }
+
 
         if (op1->type==TEMP && op2->type==TEMP)
             printf("%s TF@tempvar%d TF@tempvar%d TF@tempvar%d\n",op,tempvarcount,op1->int_hodnota,op2->int_hodnota);
@@ -307,6 +382,7 @@ void CheckOperands(token* operation,token* op1,token* op2)
         {
             op2->int_hodnota=op2->double_hodnota;
         }
+        exprtype=SymTab_DataType_Double;
 }
 
 
@@ -386,6 +462,7 @@ token* Operation(token* operation,token* op1,token* op2)
         tok->type=TEMP;
         tok->int_hodnota=tempvarcount;
         tempvarcount++;
+        relationcond=1;
         return tok;
     }
 
@@ -398,6 +475,7 @@ token* Operation(token* operation,token* op1,token* op2)
         tok->type=TEMP;
         tok->int_hodnota=tempvarcount;
         tempvarcount++;
+        relationcond=1;
         return tok;
     }
 
@@ -410,6 +488,7 @@ token* Operation(token* operation,token* op1,token* op2)
         tok->type=TEMP;
         tok->int_hodnota=tempvarcount;
         tempvarcount++;
+        relationcond=1;
         return tok;
     }
 
@@ -427,6 +506,7 @@ token* Operation(token* operation,token* op1,token* op2)
         tok->type=TEMP;
         tok->int_hodnota=tempvarcount;
         tempvarcount++;
+        relationcond=1;
         return tok;
     }
 
@@ -445,6 +525,7 @@ token* Operation(token* operation,token* op1,token* op2)
         tok->type=TEMP;
         tok->int_hodnota=tempvarcount;
         tempvarcount++;
+        relationcond=1;
         return tok;
     }
 
@@ -460,6 +541,7 @@ token* Operation(token* operation,token* op1,token* op2)
         tok->type=TEMP;
         tok->int_hodnota=tempvarcount;
         tempvarcount++;
+        relationcond=1;
         return tok;
     }
     return NULL;
