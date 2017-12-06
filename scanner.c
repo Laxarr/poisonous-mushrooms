@@ -2,6 +2,7 @@
  *
  * FIT VUT, IFJ 119
  * Author: Ondrej Brekl, xbrekl00
+ * Author: Martin Gajdosik, xgajdo21
  * Summary: Lexical scanner.
  *
  */
@@ -335,6 +336,7 @@ token* GetToken()
 
 						else {
 							tok->type = ID;
+							tok->string_hodnota=malloc(0);
 							tok->string_hodnota = realloc(tok->string_hodnota, buff->lenght);
 							strcpy(tok->string_hodnota, buff->str);
 							tok->string_hodnota[buff->lenght]='\0';

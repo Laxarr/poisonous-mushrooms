@@ -12,6 +12,7 @@
 
 #ifndef STRINGFILE
 #define STRINGFILE
+#include "error.h"
 
 typedef struct
 {

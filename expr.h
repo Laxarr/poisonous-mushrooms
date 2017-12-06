@@ -13,7 +13,7 @@
 #ifndef EXPR
 #define EXPR
 
-#define POSTEXPSIZE 100
+#define POSTEXPSIZE 500
 #include "parser.h"
 #include "stack.h"
 #include "error.h"

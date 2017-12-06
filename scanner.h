@@ -2,6 +2,7 @@
  *
  * FIT VUT, IFJ 119
  * Author: Ondrej Brekl, xbrekl00
+ * Author: Martin Gajdosik, xgajdo21
  * Summary: Lexical scanner.
  *
  */

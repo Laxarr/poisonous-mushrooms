@@ -12,6 +12,7 @@ int dowhilecount=0;
 int typetestcount=0;
 int concat=0;
 int tempvarcount=0;
+int substrcount=0;
 
 void Program_begin()
 {
@@ -218,7 +219,90 @@ void Length()
 
 void SubStr()
 {
+/*
+    char* res;
+    if (Length(s)==0 || i<=0)
+    {
+        return ""
+    }
+    else if (n<0 || n>Length(s))
+    {
+        for (int index = i;index<Length(s);index++)
+        {
+            res+=s[index];
+        }
+        return res;
+    }
+    else
+    {
+        for (int index = 0;index<n;index++)
+        {
+            res+=s[index+i];
+        }
+        return res;
+    }
+*/
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@n\n");
+    printf("POPS TF@n\n");
+    printf("DEFVAR TF@i\n");
+    printf("POPS TF@i\n");
+    printf("DEFVAR TF@s\n");
+    printf("POPS TF@s\n");
+    printf("DEFVAR TF@res\n");
+    printf("MOVE TF@res string@\n");
+    printf("DEFVAR TF@index\n");
+    printf("DEFVAR TF@length\n");
+    printf("STRLEN TF@length TF@s\n");
 
+    printf("LT GF@pom TF@i int@1\n");
+    printf("PUSHS GF@pom\n");
+    printf("EQ GF@pom TF@length int@0\n");
+    printf("PUSHS GF@pom\n");
+    printf("ORS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS substrcond1%d\n",substrcount);
+    printf("PUSHS string@\n");
+    printf("JUMP substrend%d\n",substrcount);
+
+    printf("LABEL substrcond1%d\n",substrcount);
+    printf("SUB TF@i TF@i int@1\n");
+    printf("LT GF@pom TF@n int@1\n");
+    printf("PUSHS GF@pom\n");
+    printf("GT GF@pom TF@n TF@length\n");
+    printf("PUSHS GF@pom\n");
+    printf("ORS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS substrcond2%d\n",substrcount);
+
+    printf("MOVE TF@index TF@i\n");
+    printf("LABEL substrloop1%d\n",substrcount);
+    printf("LT GF@pom TF@index TF@length\n");
+    printf("JUMPIFNEQ substrret%d GF@pom bool@true\n",substrcount);
+    printf("GETCHAR GF@pom TF@s TF@index\n");
+    printf("CONCAT TF@res TF@res GF@pom\n");
+    printf("ADD TF@index TF@index int@1\n");
+    printf("JUMP substrloop1%d\n",substrcount);
+
+    printf("LABEL substrcond2%d\n",substrcount);
+    printf("MOVE TF@index int@0\n");
+    printf("LABEL substrloop2%d\n",substrcount);
+    printf("LT GF@pom TF@index TF@n\n");
+    printf("JUMPIFNEQ substrret%d GF@pom bool@true\n",substrcount);
+    printf("ADD GF@pom TF@i TF@index\n");
+    printf("GETCHAR GF@pom TF@s GF@pom\n");
+    printf("CONCAT TF@res TF@res GF@pom\n");
+    printf("ADD TF@index TF@index int@1\n");
+    printf("JUMP substrloop2%d\n",substrcount);
+
+
+    printf("LABEL substrret%d\n",substrcount);
+    printf("PUSHS TF@res\n");
+    printf("LABEL substrend%d\n",substrcount);
+    printf("POPFRAME\n");
+    substrcount++;
+    exprtype=SymTab_DataType_String;
 }
 
 void Asc()

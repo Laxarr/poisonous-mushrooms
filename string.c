@@ -30,14 +30,13 @@ int AddChar(buffer* buff,char c)
 {
     if (buff->lenght+1 == buff->allocsize)
     {
-        char* pom;
-        pom=realloc(buff->str,buff->allocsize+ALLOC_SIZE);
-        if (pom==NULL)
+        buff->str=realloc(buff->str,buff->allocsize+ALLOC_SIZE);
+        if (buff->str==NULL)
         {
-            free(pom);
+            Error(99);
             return 0;
         }
-        buff->str=pom;
+        buff->allocsize+=ALLOC_SIZE;
     }
     buff->str[buff->lenght]=c;
     buff->lenght++;
