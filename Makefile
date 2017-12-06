@@ -3,7 +3,6 @@ FILES= parser.c parser.h string.c string.h scanner.c scanner.h debug.h debug.c e
 CFLAGS = -Wextra -pedantic 
 
 # CFLAGS = -Wall -Wextra -std=c99 -pedantic 
-# nwm jestli neprejmenovat vystupni soubor
 
 all: ifj17
 

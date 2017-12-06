@@ -18,23 +18,18 @@
 #include "string.h"
 #include "error.h"
 
+// nazvy typu tokenu
 
 typedef enum {
         tEOF,
 		tEOL,
 		CELO_CIS_DELENI,
-		MOCNICI_STRIZKA,
 		TECKA,
 		CARKA,
-		OTAZNIK,
 		MRIZKA,
 		STREDNIK,
 		KULATA_ZAV_KON,
 		KULATA_ZAV_ZAC,
-		HRANATA_ZAC,
-		HRANATA_KON,
-		SLOZENA_ZAC,
-		SLOZENA_KON,
 		ID,
 		RETEZEC,
 		PLUS,
@@ -87,7 +82,7 @@ typedef enum {
 		SUBSTR,
 	} Ttoken;
 
-	typedef struct {
+	typedef struct {		//struktura tokenu
 		Ttoken type;
 		union {
 			int int_hodnota;
@@ -99,6 +94,6 @@ typedef enum {
     token* returned;
 
 	token* GetToken();
-	int AllowedNextChar(char znak);
+	int AllowedNextChar(char znak);		
     void UngetToken(token* tok);
 #endif

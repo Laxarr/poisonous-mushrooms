@@ -9,10 +9,13 @@
 
 #include "scanner.h"
 
+// uchovava nacteny token, ktery parser vratil
 void UngetToken(token* tok)
 {
     returned=tok;
 }
+
+// funkce overuje, jestli se jedna o klicove slovo
 
 int Is_Keyword(const char *nacteny_text) {
 	char *array[35] = {"as", "asc", "declare", "do", "dim", "double", "else", "end", "chr", "function", "if", "input",
@@ -35,7 +38,7 @@ int AllowedNextChar(char znak) {		//funkce overuje, ze nasledujici znak je v mno
 		return 1;
 }
 
-token* GetToken()
+token* GetToken()  //hlavni funkce pro nacitani ze souboru a vytvareni tokenu
     {
         if (returned!=NULL)
         {
@@ -44,17 +47,17 @@ token* GetToken()
             return pom;
         }
 
-    buffer* buff = (buffer*) malloc(sizeof(buffer));
+    buffer* buff = (buffer*) malloc(sizeof(buffer));	// inicializace bufferu pro pro ukladani znaku
    	InitBuffer(buff);
     token* tok = (token*) malloc(sizeof(token));
-	//nacitani znaku
+	
 	char znak; // jeden nacteny znak
 
 	// pro cela cisla (cc) a desetinna cisla (dc)
 	int pouze_jedno_e = 0; 			//v dc bude pouze jedno 'e', pripadne 'E'
 	int pouze_jedno_znamenko = 0;	//v dc bude pouze jedno '+', pripadne '-'
 	int na_konci_je_cislice = 0;	//zajistuje, ze cc nebo dc bude koncit cislici
-	int ne_zac_nula = 0;
+	int ne_zac_nula = 0;			// pomocne promenne pro ohlidani cisel
 	int pocitadlo_nul = 0;
 	int zacatek_bezNuly = 0;
     int escapesec=0;
@@ -63,35 +66,35 @@ token* GetToken()
 
     int state = 0; //Konecny automat
 
-	while(42) {
+	while(42) {		//nekonecny while , vyskakuje se breaky
 
-	znak = getchar();
+	znak = getchar(); //nacitani znaku
 
-		switch (state) {
+		switch (state) {		// zde je velký case a spolecne s cyklem while tvori konecny automat
 			case 0:
-					if ((isdigit(znak)) && (znak != '0')) {
+					if ((isdigit(znak)) && (znak != '0')) {		//zpracovani cisel, nezacinaji nulou
 						AddChar(buff, znak);
 						zacatek_bezNuly = 1;
 						na_konci_je_cislice = 1;
 						state = 1; }
 
-					else if ((isdigit(znak)) && (znak == '0')) {
+					else if ((isdigit(znak)) && (znak == '0')) {  //zpracovani cisel, konkretne nul
 						pocitadlo_nul = 1;
 						na_konci_je_cislice = 1;
 						state = 1; }
 
-					else if (znak == EOF) {
+					else if (znak == EOF) {		//EOF
 						AddChar(buff, znak);
 						tok->type = tEOF;
 						FreeBuffer(buff);
 						free(buff);
 						return tok;  }
 
-					else if (isalpha(znak)) {
+					else if (isalpha(znak)) {		//zpracovani pismen
 						state = 5;
 						AddChar(buff, tolower(znak)); }
 
-					else if (isspace(znak)) { state = 0;
+					else if (isspace(znak)) { state = 0;	// mezery
 						if (znak == '\n') {
 							AddChar(buff, znak);
 							tok->type = tEOL;
@@ -100,35 +103,35 @@ token* GetToken()
 							return tok;	}
 						}
 
-					else if (znak == '+') {
+					else if (znak == '+') {		//plus
 						AddChar(buff, znak);
 						tok->type = PLUS;
 						FreeBuffer(buff);
 						free(buff);
 						return tok; }
 
-					else if (znak == '-') {
+					else if (znak == '-') {		//minus
 						AddChar(buff, znak);
 						tok->type = MINUS;
 						FreeBuffer(buff);
 						free(buff);
 						return tok; }
 
-					else if (znak == '*') {
+					else if (znak == '*') {   	//nasobeni
 						AddChar(buff, znak);
 						tok->type = NASOBENI;
 						FreeBuffer(buff);
 						free(buff);
 						return tok;	}
 
-					else if (znak == '/') { state = 12;
+					else if (znak == '/') { state = 12;		//bud deleni nebo komentar
 						 }
 
 					else if (znak == '\0') {
 						state = 0;
 						 }
 
-					else if (znak == 92) {
+					else if (znak == 92) {					//zpetne lomitko - celociselne deleni
 						tok->type = CELO_CIS_DELENI;
 						FreeBuffer(buff);
 						free(buff);
@@ -138,27 +141,27 @@ token* GetToken()
 					else if (znak == '\n') {
 						state = 0;
 						 }
-					else if (znak == '!') {
+					else if (znak == '!') {		// retezcove literaty
 						state = 10;
 					}
 
-					else if (znak == '_') {
+					else if (znak == '_') {		// identifikator
 						state = 6;
 						AddChar(buff, znak); }
 
-					else if (znak == ',') {
+					else if (znak == ',') {		//carka
 						tok->type = CARKA;
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
 					}
-					else if (znak == ';') {
+					else if (znak == ';') {			//strednik
 						tok->type = STREDNIK;
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
 					}
-					else if (znak == '=') {
+					else if (znak == '=') { 	//rovnost
 						tok->type = ROVNOST;
 						FreeBuffer(buff);
 						free(buff);
@@ -170,24 +173,24 @@ token* GetToken()
 						state = 9;
 					}
 
-					else if (znak == '<') {	state = 3; AddChar(buff, znak);	}
+					else if (znak == '<') {	state = 3; AddChar(buff, znak);	}  //mensi, mensi nebo rovno, nerovnost
 
-					else if (znak == '>') {	state = 4; AddChar(buff, znak); }
+					else if (znak == '>') {	state = 4; AddChar(buff, znak); } 	//vetsi, vesti nebo rovno
 
-					else if (znak == '(') {
+					else if (znak == '(') {				//zacatek zavorky
                         tok->type = KULATA_ZAV_ZAC;
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
 					}
-					else if (znak == ')') {
+					else if (znak == ')') {				// konec zavorky
 						tok->type = KULATA_ZAV_KON;
 						FreeBuffer(buff);
 						free(buff);
 						return tok;
 					}
 
-					else
+					else 								// jestli jsou nacteny jine znaky, tak je to chyba
                         Error(1);
 					break;
 
@@ -273,8 +276,8 @@ token* GetToken()
 
 					}
 
-					else{							//neco je spatne
-						// nejaky error
+					else{						
+				
 						Error(1);
 						return tok;
 					}
