@@ -9,7 +9,7 @@
 
 #define ALLOC_SIZE 100
 
-int InitBuffer(buffer* buff)
+int InitBuffer(buffer* buff)//Inicializace bufferu pro zteni ze vstupu
 {
     buff->allocsize=ALLOC_SIZE;
     buff->lenght=0;
@@ -21,12 +21,12 @@ int InitBuffer(buffer* buff)
     return 1;
 }
 
-void FreeBuffer(buffer* buff)
+void FreeBuffer(buffer* buff)//Uvolneni bufferu
 {
     free(buff->str);
 }
 
-int AddChar(buffer* buff,char c)
+int AddChar(buffer* buff,char c)//Prida znak do bufferu
 {
     if (buff->lenght+1 == buff->allocsize)
     {
@@ -43,12 +43,12 @@ int AddChar(buffer* buff,char c)
     return 1;
 }
 
-char *GetStringBuffer(buffer *buff)
+char *GetStringBuffer(buffer *buff)//Vraci obsah bufferu
 {
    return buff->str;
 }
 
-int InitParArray(pararray* p)
+int InitParArray(pararray* p)//Inicializuje 2D pole znaku, ktere uchovava identifikatory parametru funkci
 {
     p->parcount=0;
     p->allocsize=ALLOC_SIZE;
@@ -58,7 +58,7 @@ int InitParArray(pararray* p)
     return 1;
 }
 
-int InsertPar(pararray* p,char* id)
+int InsertPar(pararray* p,char* id)//Vlozeni noveho identifikatoru parametru funkce
 {
     if (p->parcount+1 == p->allocsize)
     {

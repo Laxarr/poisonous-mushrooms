@@ -9,7 +9,7 @@
 
 int debugg=0;
 
-void PrintToken(token* tok)
+void PrintToken(token* tok)//Vypis tokenu ta stdout
 {
     if (debugg==0)
         return;

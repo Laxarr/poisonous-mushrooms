@@ -94,6 +94,6 @@ typedef enum {
     token* returned;
 
 	token* GetToken();
-	int AllowedNextChar(char znak);		
+	int AllowedNextChar(char znak);
     void UngetToken(token* tok);
 #endif

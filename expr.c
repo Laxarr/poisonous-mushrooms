@@ -9,7 +9,7 @@
 
 tStack* zasobnik;
 
-int OperatorPriority(token* tok)
+int OperatorPriority(token* tok)//Prirazuje prioritu operatorum, nahrazuje precencni tabulku
 {
     if (tok->type == NASOBENI) return 3;
     else if (tok->type == DELENI) return 3;
@@ -25,7 +25,7 @@ int OperatorPriority(token* tok)
     return -1;
 }
 
-int ValidType(token* tok)
+int ValidType(token* tok)//Kontrola, zda se jedna o povoleny token ve vyrazu
 {
     if (tok->type == PLUS) return 4;
     else if (tok->type == MINUS) return 4;
@@ -58,7 +58,7 @@ int ValidType(token* tok)
     else return 0;
 }
 
-void untilLeftPar (int* index )
+void untilLeftPar (int* index )//Odstrani ze zasobniku prvky po levou zavorku
 {
     token* pom=stackTop(zasobnik);
     while (pom->type != KULATA_ZAV_ZAC)
@@ -71,7 +71,7 @@ void untilLeftPar (int* index )
     stackPop(zasobnik);
 }
 
-void doOperation (token* tok,int* index )
+void doOperation (token* tok,int* index )//Na zaklade priority operatoru, provede prislusnou akci
 {
     int done=0;
     while (!done)
@@ -101,7 +101,7 @@ void doOperation (token* tok,int* index )
     }
 }
 
-int SameType(SymTab_Element* par,token* tok)
+int SameType(SymTab_Element* par,token* tok)//Kontrola, zda se jedna o stejny datovy typ
 {
     if (tok->type==RETEZEC && par->data_type==SymTab_DataType_String)
         return 1;
@@ -119,7 +119,7 @@ int SameType(SymTab_Element* par,token* tok)
     return 0;
 }
 
-int Expr_Analysis()
+int Expr_Analysis()//Precencni analyza vyrazu
 {
     token* tok=GetToken(soubor);
     PrintToken(tok);
@@ -235,14 +235,14 @@ int Expr_Analysis()
             Error(3);
         }
     }
-
+    //Zpracovani vyrazu
     zasobnik = (tStack*) malloc(sizeof(tStack));
     stackInit(zasobnik);
     int index=0;
     token* pred=NULL;
     if (ValidType(tok)==4)
         Error(2);
-
+    //Cte a zpracovava vyraz
     while (1)
     {
         int i = ValidType(tok);
@@ -274,6 +274,7 @@ int Expr_Analysis()
         pred=tok;
         tok=GetToken(soubor);
         PrintToken(tok);
+        //Syntakticka analyza vyrazu
         if (ValidType(tok)==1 && ValidType(pred)==1)
         {
             Error(2);
@@ -318,7 +319,7 @@ int Expr_Analysis()
 
     UngetToken(tok);
 
-    while (!stackEmpty(zasobnik))
+    while (!stackEmpty(zasobnik))//Vyprazdni zasobnik
     {
         postfixexp[index]=stackTop(zasobnik);
         stackPop(zasobnik);
@@ -341,7 +342,7 @@ int Expr_Analysis()
     }
 
     int i=0;
-    for (;i<index;i++)
+    for (;i<index;i++)//Vycisleni vyrazu
     {
         int typ=ValidType(postfixexp[i]);
         if (typ==1)

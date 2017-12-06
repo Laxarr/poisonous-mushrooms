@@ -2,12 +2,13 @@
  *
  * FIT VUT, IFJ 119
  * Author: Ondrej Brekl, xbrekl00
+ * Author: Tverdokhliebov Yaroslav, xtverdo00
  * Summary: Zpracovani chybovych stavu.
  *
  */
 #include "error.h"
 
-void Error(int errcode)
+void Error(int errcode)//Zpracovani chybovych stavu
 {
     switch (errcode)
     {

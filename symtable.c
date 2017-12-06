@@ -7,7 +7,8 @@
  */
 #include "symtable.h"
 
-Sym_Tab* sym_tab_init(){
+Sym_Tab* sym_tab_init()//Inicializace tabulky symbolu
+{
     Sym_Tab* table = (Sym_Tab *) malloc(sizeof(Sym_Tab));
     if (table == NULL)
         return NULL;
@@ -15,7 +16,7 @@ Sym_Tab* sym_tab_init(){
     return table;
 }
 
-int sym_tab_insert(Sym_Tab *table,SymTab_Element* elem)
+int sym_tab_insert(Sym_Tab *table,SymTab_Element* elem)//Nerekurzivni vlozeni prvku do binarniho stromu tabulky symbolu
 {
     if (elem==NULL || table==NULL)
         return 0;
@@ -63,7 +64,7 @@ int sym_tab_insert(Sym_Tab *table,SymTab_Element* elem)
     return 0;
 }
 
-SymTab_Element* sym_tab_find(Sym_Tab *table,char* id)
+SymTab_Element* sym_tab_find(Sym_Tab *table,char* id)//Nerekurzivni hledani prvku v binarnim stromu tabulky symbolu
 {
     if (table==NULL)
     {
@@ -96,7 +97,7 @@ SymTab_Element* sym_tab_find(Sym_Tab *table,char* id)
     return NULL;
 }
 
-SymTab_Element* create_sym_tab_elem_par(char* id, SymTab_DataType data)
+SymTab_Element* create_sym_tab_elem_par(char* id, SymTab_DataType data)//Vytvori polozku parametru pro tabulku symbolu
 {
     SymTab_Element* new_elem_ptr = (SymTab_Element *) malloc(sizeof(SymTab_Element));
     if (new_elem_ptr == NULL)
@@ -115,7 +116,7 @@ SymTab_Element* create_sym_tab_elem_par(char* id, SymTab_DataType data)
         return new_elem_ptr;
     }
 }
-SymTab_Element* create_sym_tab_elem_fun(char* id, SymTab_DataType data)
+SymTab_Element* create_sym_tab_elem_fun(char* id, SymTab_DataType data)//Vytvori polozku funkce pro tabulku symbolu
 {
     SymTab_Element* new_elem_ptr = (SymTab_Element *) malloc(sizeof(SymTab_Element));
     if (new_elem_ptr == NULL)
@@ -132,13 +133,14 @@ SymTab_Element* create_sym_tab_elem_fun(char* id, SymTab_DataType data)
         new_elem_ptr->paramcount=0;
         new_elem_ptr->pararr=malloc(sizeof(pararray));
         InitParArray(new_elem_ptr->pararr);
-        new_elem_ptr->localtable=sym_tab_init();
+        new_elem_ptr->localtable=sym_tab_init();//Inicializuje lokalni tabulku symbolu
         new_elem_ptr->left=NULL;
         new_elem_ptr->right=NULL;
         return new_elem_ptr;
     }
 }
-SymTab_Element* create_sym_tab_elem_var(char* id, SymTab_DataType data)
+
+SymTab_Element* create_sym_tab_elem_var(char* id, SymTab_DataType data)//Vytvori polozku promenne pro tabulku symbolu
 {
     SymTab_Element* new_elem_ptr = (SymTab_Element *) malloc(sizeof(SymTab_Element));
     if (new_elem_ptr == NULL)

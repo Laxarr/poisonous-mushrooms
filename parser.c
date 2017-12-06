@@ -7,13 +7,13 @@
  */
 #include "parser.h"
 
-int main ()
+int main ()//Vstupní bod programu
 {
     Parse();
 	return 0;
 }
 
-void BuildInFunctions()
+void BuildInFunctions() //Vložení funkcí Asc,SubStr,Chr,Length do tabulky symbolů
 {
     SymTab_Element* pom=create_sym_tab_elem_fun("Length",SymTab_DataType_Integer);
     pom->paramcount=1;
@@ -57,15 +57,15 @@ void BuildInFunctions()
     sym_tab_insert(CurrentST,pom);
 }
 
-int Parse()
+int Parse()//Zahájení překladu
 {
-    GlobalST=sym_tab_init();
-    BuildInFunctions();
-    Program_begin();
+    GlobalST=sym_tab_init();//Inicializace Globalní tabulky symbolů
+    BuildInFunctions();//Vložení funkcí Asc,SubStr,Chr,Length do tabulky symbolů
+    Program_begin();//Vygeneruje první část vysledneho programu
     return Program();
 }
 
-void DeleteEOL()//Smazani znaku noveho radku
+void DeleteEOL()//Smazani znaků noveho řádku
 {
     token* tok=GetToken(soubor);
     PrintToken(tok);
@@ -175,7 +175,7 @@ int FunDec()//Deklarace funkce
     }
 
     char* idfunkce=tok->string_hodnota;
-    if (sym_tab_find(GlobalST,idfunkce)!=NULL)
+    if (sym_tab_find(GlobalST,idfunkce)!=NULL)//Redeklarace funkce
     {
         Error(3);
         return 0;
@@ -183,7 +183,7 @@ int FunDec()//Deklarace funkce
     declared=0;
     currentfun=idfunkce;
     SymTab_Element* pom=create_sym_tab_elem_fun(idfunkce,SymTab_DataType_Void);
-    sym_tab_insert(GlobalST,pom);
+    sym_tab_insert(GlobalST,pom);//Vlozeni nove funkce do tabulky symbolů
     CurrentST=pom->localtable;
 
     tok=GetToken(soubor);
@@ -221,7 +221,7 @@ int FunDec()//Deklarace funkce
         Error(2);
         return 0;
     }
-
+    //Zjisti navratovy typ funkce
     pom=sym_tab_find(GlobalST,idfunkce);
     if (tok->type==STRING)
     {
@@ -269,7 +269,7 @@ int FunDef()//Definice funkce
     char* idfunkce=tok->string_hodnota;
     currentfun=idfunkce;
     SymTab_Element* pom=sym_tab_find(GlobalST,idfunkce);
-    if (pom==NULL)
+    if (pom==NULL)//Pokud funkce neni deklarovana, vlozi ji do tabulky symbolu
     {
         declared=0;
         pom=create_sym_tab_elem_fun(idfunkce,SymTab_DataType_Void);
@@ -278,7 +278,7 @@ int FunDef()//Definice funkce
     }
     else
     {
-        if (pom->initialized==1)
+        if (pom->initialized==1)//Chyba pri redefinici funkce
         {
             Error(3);
         }
@@ -325,7 +325,7 @@ int FunDef()//Definice funkce
         Error(2);
         return 0;
     }
-
+    //Zjisti a zkontroluje navratovy typ funkce
     pom=sym_tab_find(GlobalST,idfunkce);
     if (declared==0)
     {
@@ -439,7 +439,7 @@ int Fun()//Deklarace a definice funkci
         UngetToken(tok);
         return 1;
     }
-    if (tok->type==DECLARE)
+    if (tok->type==DECLARE)//Bude nasledovat deklarace funkce
     {
         UngetToken(tok);
         fdec=FunDec();
@@ -452,7 +452,7 @@ int Fun()//Deklarace a definice funkci
         PrintToken(tok);
     }
 
-    if (tok->type==FUNCTION)
+    if (tok->type==FUNCTION)//Bude nasledovat definice funkce
     {
         UngetToken(tok);
         fdef= FunDef();
@@ -495,15 +495,11 @@ int Par()//Parametr funkce
         return 0;
     }
     char* idpar=tok->string_hodnota;
-    if (sym_tab_find(GlobalST,idpar)!=NULL)
+    if (sym_tab_find(GlobalST,idpar)!=NULL)//Id parametru je stejny jako id nejak funkce
     {
         Error(3);
     }
-    if (strcmp(idpar,currentfun)==0)
-    {
-        Error(3);
-    }
-    for (int i = 0;i<sym_tab_find(GlobalST,currentfun)->paramcount-1;i++)
+    for (int i = 0;i<sym_tab_find(GlobalST,currentfun)->paramcount-1;i++)//Duplicita id v parametrech funkce
     {
         if (strcmp(idpar,sym_tab_find(GlobalST,currentfun)->pararr->par[i])==0)
         {
@@ -533,7 +529,7 @@ int Par()//Parametr funkce
         Error(2);
         return 0;
     }
-
+    //Datovy typ parametru
     SymTab_DataType typ;
     if (tok->type==STRING)
     {
@@ -547,7 +543,7 @@ int Par()//Parametr funkce
     {
         typ=SymTab_DataType_Integer;
     }
-    if (declared==1)
+    if (declared==1)//Kontrola typu parametru pri deklrovane funkci
     {
         SymTab_Element* pom=sym_tab_find(CurrentST,idpar);
         if (pom->data_type!=typ)
@@ -556,7 +552,7 @@ int Par()//Parametr funkce
             return 0;
         }
     }
-    else
+    else//Vlozeni parametru do lokalni tabulky symbolu
     {
         SymTab_Element* pom=create_sym_tab_elem_par(idpar,typ);
         sym_tab_insert(CurrentST,pom);
@@ -942,7 +938,7 @@ int S()//Prikaz
     return 1;
 }
 
-int E()
+int E()//Vyraz
 {
     return Expr_Analysis();
 }

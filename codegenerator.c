@@ -14,42 +14,42 @@ int concat=0;
 int tempvarcount=0;
 int substrcount=0;
 
-void Program_begin()
+void Program_begin()//Zacatek programu
 {
     printf(".IFJcode17\n");
     printf("DEFVAR GF@pom\n");
     printf("JUMP main\n");
 }
 
-void Main_fun()
+void Main_fun()//Hlavni telo programu
 {
     printf("LABEL main\n");
     printf("CREATEFRAME\n");
 }
 
-void IfCond()
+void IfCond()//Podminka v if then else vyrazu
 {
     printf("PUSHS bool@true\n");
     printf("JUMPIFNEQS ifelse%d\n",ifelsecount);
 }
 
-void Iftrueend()
+void Iftrueend()//Label pro kladne vyhodnoceni vyrazu v if then else vyrazu
 {
     printf("JUMP ifelseend%d\n",ifelsecount);
 }
 
-void IfElse()
+void IfElse()//Label pro zaporne vyhodnoceni vyrazu v if then else vyrazu
 {
     printf("LABEL ifelse%d\n",ifelsecount);
 }
 
-void IfEnd()
+void IfEnd()//Label pro konec if then else vyrazu
 {
     printf("LABEL ifelseend%d\n",ifelsecount);
     ifelsecount++;
 }
 
-void LoopStart()
+void LoopStart()//Label pro zacatek cyklu
 {
     cycle=1;
     for (int i=0;i<10;i++)
@@ -59,13 +59,13 @@ void LoopStart()
     printf("LABEL while%d\n",dowhilecount);
 }
 
-void LoopCond()
+void LoopCond()//podminka cyklu
 {
     printf("PUSHS bool@true\n");
     printf("JUMPIFNEQS whileend%d\n",dowhilecount);
 }
 
-void LoopEnd()
+void LoopEnd()//Konec cyklu
 {
     printf("JUMP while%d\n",dowhilecount);
     printf("LABEL whileend%d\n",dowhilecount);
@@ -73,7 +73,7 @@ void LoopEnd()
     cycle=0;
 }
 
-void Declare_var(char* id)
+void Declare_var(char* id)//deklarace promenne
 {
     printf("DEFVAR TF@%s\n",id);
     SymTab_Element* pom= sym_tab_find(CurrentST,id);
@@ -85,7 +85,7 @@ void Declare_var(char* id)
         printf("MOVE TF@%s string@""\n",id);
 }
 
-void Read(token* var)//vyresit znak pro mezernik
+void Read(token* var)//cteni ze vstupu
 {
     printf("WRITE string@?");
     printf("%c",92);
@@ -99,23 +99,23 @@ void Read(token* var)//vyresit znak pro mezernik
         printf("READ TF@%s string\n",var->string_hodnota);
 }
 
-void ConvertToInt()
+void ConvertToInt()//konverze typu
 {
     printf("FLOAT2INTS\n");
 }
 
-void ConvertToFloat()
+void ConvertToFloat()//konverze typu
 {
     printf("INT2FLOATS\n");
 }
 
-void Write()
+void Write()//vyps na vystup
 {
     printf("POPS GF@pom\n");
     printf("WRITE GF@pom\n");
 }
 
-void PushRetVal(token* tok)
+void PushRetVal(token* tok)//vrati navratovou hodnotu
 {
     if (tok->type==NUMBER_DOUBLE)
     {
@@ -138,7 +138,7 @@ void PushRetVal(token* tok)
     }
 }
 
-void PushParam(token* tok)
+void PushParam(token* tok)//umisti na zasobnik parametr funkce
 {
     if (tok->type==NUMBER_DOUBLE)
     {
@@ -161,14 +161,14 @@ void PushParam(token* tok)
     }
 }
 
-void Call_fun(char* id)
+void Call_fun(char* id)//volani funkce
 {
     printf("PUSHFRAME\n");
     printf("CALL %s\n",id);
     printf("POPFRAME\n");
 }
 
-void Declare_fun(char* id)
+void Declare_fun(char* id)//deklarace funkce
 {
     printf("LABEL %s\n",id);
     printf("CREATEFRAME\n");
@@ -180,7 +180,7 @@ void Declare_fun(char* id)
     }
 }
 
-void ImplicitReturn()
+void ImplicitReturn()//Implicitni navratova hodnota
 {
     SymTab_DataType pom=sym_tab_find(CurrentST,currentfun)->data_type;
     if (pom==SymTab_DataType_Double)
@@ -197,17 +197,17 @@ void ImplicitReturn()
     }
 }
 
-void Declare_funend()
+void Declare_funend()//Konec funkce
 {
     printf("RETURN\n");
 }
 
-void AssignVal(char* id)
+void AssignVal(char* id)//Prirazeni hodnoty vyrazu
 {
     printf("POPS TF@%s\n",id);
 }
 
-void Length()
+void Length()//Funkce pro delku retezce
 {
     printf("DEFVAR TF@tempvar%d\n",tempvarcount);
     printf("POPS TF@tempvar%d\n",tempvarcount);
@@ -217,31 +217,8 @@ void Length()
     exprtype=SymTab_DataType_Integer;
 }
 
-void SubStr()
+void SubStr()//Funkcepro podretezec
 {
-/*
-    char* res;
-    if (Length(s)==0 || i<=0)
-    {
-        return ""
-    }
-    else if (n<0 || n>Length(s))
-    {
-        for (int index = i;index<Length(s);index++)
-        {
-            res+=s[index];
-        }
-        return res;
-    }
-    else
-    {
-        for (int index = 0;index<n;index++)
-        {
-            res+=s[index+i];
-        }
-        return res;
-    }
-*/
     printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
     printf("DEFVAR TF@n\n");
@@ -305,7 +282,7 @@ void SubStr()
     exprtype=SymTab_DataType_String;
 }
 
-void Asc()
+void Asc()//Funkce pro ascii hodnotu znaku
 {
     printf("DEFVAR TF@tempvar%d\n",tempvarcount+1);
     printf("POPS TF@tempvar%d\n",tempvarcount+1);
@@ -328,7 +305,7 @@ void Asc()
     exprtype=SymTab_DataType_Integer;
 }
 
-void Chr()
+void Chr()//Funkce pro znak podle ascii hodnoty
 {
     printf("DEFVAR TF@tempvar%d\n",tempvarcount);
     printf("POPS TF@tempvar%d\n",tempvarcount);
@@ -343,7 +320,7 @@ void Chr()
     exprtype=SymTab_DataType_String;
 }
 
-char* GetOperator(token* operation)
+char* GetOperator(token* operation)//Vraci retezec s instrukci
 {
     if (operation->type==PLUS)
         return "ADD";
@@ -363,7 +340,7 @@ char* GetOperator(token* operation)
         return "EQ";
 }
 
-void CheckOperands(token* operation,token* op1,token* op2)
+void CheckOperands(token* operation,token* op1,token* op2)//Generator logicko-aritmetickych operaci
 {
         SymTab_Element* op1pom=NULL;
         SymTab_Element* op2pom=NULL;
@@ -386,7 +363,7 @@ void CheckOperands(token* operation,token* op1,token* op2)
         if (op1->type==RETEZEC) concat++;
         if (op2->type==RETEZEC) concat++;
 
-        if (concat==2)
+        if (concat==2)//Bude se provadet konkatenace
         {
             if (operation->type!=PLUS)
             {
@@ -420,7 +397,7 @@ void CheckOperands(token* operation,token* op1,token* op2)
         {
             op2->double_hodnota=op2->int_hodnota;
         }
-
+        //Konverce datovych typu
         if (op1pom!=NULL)
         {
             printf("TYPE GF@pom TF@%s\n",op1pom->id);
@@ -438,7 +415,7 @@ void CheckOperands(token* operation,token* op1,token* op2)
             typetestcount++;
         }
 
-
+        //generovani aritmeticko/logickych operaci
         if (op1->type==TEMP && op2->type==TEMP)
             printf("%s TF@tempvar%d TF@tempvar%d TF@tempvar%d\n",op,tempvarcount,op1->int_hodnota,op2->int_hodnota);
         else if (op1->type==TEMP && op2pom==NULL)
@@ -470,7 +447,7 @@ void CheckOperands(token* operation,token* op1,token* op2)
 }
 
 
-token* Operation(token* operation,token* op1,token* op2)
+token* Operation(token* operation,token* op1,token* op2)//Triadresny kod
 {
     token* tok = (token*) malloc(sizeof(token));
 

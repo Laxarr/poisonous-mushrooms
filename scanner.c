@@ -50,7 +50,7 @@ token* GetToken()  //hlavni funkce pro nacitani ze souboru a vytvareni tokenu
     buffer* buff = (buffer*) malloc(sizeof(buffer));	// inicializace bufferu pro pro ukladani znaku
    	InitBuffer(buff);
     token* tok = (token*) malloc(sizeof(token));
-	
+
 	char znak; // jeden nacteny znak
 
 	// pro cela cisla (cc) a desetinna cisla (dc)
@@ -276,8 +276,8 @@ token* GetToken()  //hlavni funkce pro nacitani ze souboru a vytvareni tokenu
 
 					}
 
-					else{						
-				
+					else{
+
 						Error(1);
 						return tok;
 					}
@@ -527,4 +527,3 @@ token* GetToken()  //hlavni funkce pro nacitani ze souboru a vytvareni tokenu
 	} //konec while
 
 }
-
